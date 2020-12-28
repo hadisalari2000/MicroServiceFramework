@@ -4,6 +4,7 @@ import com.salari.framework.uaa.model.base.entity.BaseEntity;
 import com.salari.framework.uaa.model.enums.Genders;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
@@ -13,6 +14,7 @@ import javax.persistence.*;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name="persons")
 public class Person extends BaseEntity<Integer> {

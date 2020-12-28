@@ -2,10 +2,7 @@ package com.salari.framework.uaa.model.entity;
 
 import com.salari.framework.uaa.model.base.entity.BaseEntity;
 import com.salari.framework.uaa.model.enums.RoleTypes;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import javax.persistence.Column;
@@ -18,6 +15,7 @@ import java.util.Set;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name="roles")
 public class Role extends BaseEntity<Integer> {
