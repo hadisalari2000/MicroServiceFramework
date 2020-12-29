@@ -2,6 +2,10 @@ package com.salari.framework.uaa.model.domain.person;
 import com.salari.framework.uaa.model.enums.Genders;
 import lombok.*;
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 @Data
 @Builder
@@ -9,27 +13,34 @@ import javax.persistence.*;
 @AllArgsConstructor
 public class PersonEditRequest {
 
-    @Column(nullable = false)
+    @NotNull
     private Integer id;
 
-    @Column(length = 10,nullable = false)
+    @NotBlank
+    @Size(min=10, max = 10)
+    @Pattern(regexp = "[0-9]\\d{9}")
     private String nationalCode;
 
-    @Column(length = 20,nullable = false)
+    @NotBlank
+    @Size(min=3, max = 20)
     private String firstName;
 
-    @Column(length = 20,nullable = false)
+    @NotBlank
+    @Size(min=3, max = 20)
     private String lastName;
 
-    @Column(length = 20,nullable = false)
+    @NotBlank
+    @Size(min=3, max = 20)
     private String fatherName;
 
     @Enumerated(EnumType.STRING)
     private Genders gender;
 
-    @Column(length = 11,nullable = false)
+    @NotBlank
+    @Size(min=10,max=10)
+    @Pattern(regexp = "^09\\d{9}$")
     private String mobileNumber;
 
-    @Column(nullable = false)
+    @NotNull
     private Long birthDate;
 }

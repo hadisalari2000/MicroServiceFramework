@@ -1,6 +1,6 @@
 package com.salari.framework.uaa.model.domain.user;
 import lombok.*;
-import javax.persistence.*;
+import javax.validation.constraints.*;
 
 @Data
 @Builder
@@ -8,16 +8,18 @@ import javax.persistence.*;
 @AllArgsConstructor
 public class UserAddRequest {
 
-    @Column(length = 20,nullable = false,unique = true)
+    @NotBlank
+    @Size(min= 3,max=20)
     private String username;
 
-    @Column(length = 50,nullable = false)
+    @NotBlank
+    @Size(max=50)
     private String password;
 
-    @Column(nullable = false)
+    @NotNull
     private Integer personId;
 
-    @Column(nullable = false)
+    @NotNull
     private Integer roleId;
 
 }
