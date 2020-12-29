@@ -7,11 +7,13 @@ import com.salari.framework.uaa.model.domain.role.RoleEditRequest;
 import com.salari.framework.uaa.model.dto.base.BaseDTO;
 import com.salari.framework.uaa.model.dto.base.MetaDTO;
 import com.salari.framework.uaa.model.entity.Role;
+import com.salari.framework.uaa.model.enums.RoleTypes;
 import com.salari.framework.uaa.model.mapper.RoleMapper;
 import com.salari.framework.uaa.repository.RoleRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -30,6 +32,46 @@ public class RoleService {
         return BaseDTO.builder()
                 .metaDTO(MetaDTO.getInstance())
                 .data(roleMapper.ROLE_DTO(role))
+                .build();
+    }
+
+    public BaseDTO getByKey(String key){
+        Role role=roleRepository.findByKey(key)
+                .orElseThrow(()->ServiceException.getInstance("role-not-found",HttpStatus.NOT_FOUND));
+        return BaseDTO.builder()
+                .metaDTO(MetaDTO.getInstance())
+                .data(roleMapper.ROLE_DTO(role))
+                .build();
+    }
+
+    public BaseDTO getAllByActivation(Boolean active){
+
+        List<Role> roles=roleRepository.findAllByActive(active)
+                .orElseThrow(()->ServiceException.getInstance("role-not-found",HttpStatus.NOT_FOUND));
+
+        return BaseDTO.builder()
+                .metaDTO(MetaDTO.getInstance())
+                .data(roles.stream().map(roleMapper::ROLE_DTO))
+                .build();
+    }
+
+    public BaseDTO getAllByUserId(Integer userId){
+        List<Role> roles=roleRepository.findAllByUsers_Id(userId)
+                .orElseThrow(()->ServiceException.getInstance("role-not-found",HttpStatus.NOT_FOUND));
+
+        return BaseDTO.builder()
+                .metaDTO(MetaDTO.getInstance())
+                .data(roles.stream().map(roleMapper::ROLE_DTO))
+                .build();
+    }
+
+    public BaseDTO getAllByRoleType(RoleTypes roleType){
+        List<Role> roles=roleRepository.findAllByRoleType(roleType)
+                .orElseThrow(()->ServiceException.getInstance("role-not-found",HttpStatus.NOT_FOUND));
+
+        return BaseDTO.builder()
+                .metaDTO(MetaDTO.getInstance())
+                .data(roles.stream().map(roleMapper::ROLE_DTO))
                 .build();
     }
 
