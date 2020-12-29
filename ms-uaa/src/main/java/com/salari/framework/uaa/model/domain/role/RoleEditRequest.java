@@ -22,7 +22,7 @@ public class RoleEditRequest {
     private String description;
 
     @Column(nullable = false)
-    private Boolean active=true;
+    private Boolean active;
 
     @Column(nullable = false)
     private RoleTypes roleType;

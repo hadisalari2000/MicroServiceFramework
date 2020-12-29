@@ -13,7 +13,7 @@ public class RoleDTO {
     private String title;
     private String key;
     private String description;
-    private Boolean active=true;
+    private Boolean active;
     private RoleTypes roleType;
     private Set<UserDTO> users;
 }
