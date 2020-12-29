@@ -1,9 +1,9 @@
 package com.salari.framework.uaa.model.domain.user;
-import com.salari.framework.uaa.model.entity.Role;
 import lombok.*;
-import org.springframework.lang.NonNull;
 
-import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.Set;
 
 @Data
@@ -12,15 +12,16 @@ import java.util.Set;
 @AllArgsConstructor
 public class UserEditRequest {
 
-    @Column(nullable = false)
+    @NotNull
     private Integer id;
 
-    @Column(length = 20,nullable = false,unique = true)
+    @NotBlank
+    @Size(min= 3,max=20)
     private String username;
 
-    @Column(nullable = false)
+    @NotNull
     private Integer personId;
 
-    @NonNull
+    @NotNull
     private Set<Integer> roleIds;
 }

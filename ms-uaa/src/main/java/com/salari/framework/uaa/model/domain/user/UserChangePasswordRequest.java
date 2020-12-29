@@ -1,6 +1,9 @@
 package com.salari.framework.uaa.model.domain.user;
 import lombok.*;
 import javax.persistence.Column;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 @Data
 @Builder
@@ -8,15 +11,18 @@ import javax.persistence.Column;
 @AllArgsConstructor
 public class UserChangePasswordRequest {
 
-    @Column(nullable = false)
+    @NotNull
     private Integer id;
 
-    @Column(length = 50, nullable = false)
+    @NotBlank
+    @Size(max=50)
     private String oldPassword;
 
-    @Column(length = 50, nullable = false)
+    @NotBlank
+    @Size(max=50)
     private String newPassword;
 
-    @Column(length = 50, nullable = false)
+    @NotBlank
+    @Size(max=50)
     private String confirmPassword;
 }

@@ -2,6 +2,9 @@ package com.salari.framework.uaa.model.domain.role;
 import com.salari.framework.uaa.model.enums.RoleTypes;
 import lombok.*;
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 @Data
 @Builder
@@ -9,21 +12,20 @@ import javax.persistence.*;
 @AllArgsConstructor
 public class RoleEditRequest {
 
-    @Column(nullable = false)
+    @NotNull
     private Integer id;
 
-    @Column(length = 50,nullable = false)
+    @NotBlank
+    @Size(min=3, max = 50)
     private String title;
 
-    @Column(length = 20,nullable = false)
+    @NotBlank
+    @Size(min=3, max = 20)
     private String key;
 
-    @Column(length = 100)
+    @Size(max= 100)
     private String description;
 
-    @Column(nullable = false)
-    private Boolean active;
-
-    @Column(nullable = false)
+    @NotNull
     private RoleTypes roleType;
 }

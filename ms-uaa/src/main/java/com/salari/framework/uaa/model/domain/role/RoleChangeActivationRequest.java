@@ -1,15 +1,15 @@
 package com.salari.framework.uaa.model.domain.role;
 import lombok.*;
-import javax.persistence.Column;
+import javax.validation.constraints.NotNull;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class RoleChangeActivationRequest {
-    @Column(nullable = false)
+    @NotNull
     private Integer id;
 
-    @Column(nullable = false)
+    @NotNull
     private Boolean active;
 }

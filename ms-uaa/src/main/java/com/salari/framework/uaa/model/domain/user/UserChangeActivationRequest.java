@@ -1,6 +1,7 @@
 package com.salari.framework.uaa.model.domain.user;
 import lombok.*;
 import javax.persistence.Column;
+import javax.validation.constraints.NotNull;
 
 @Data
 @Builder
@@ -8,9 +9,9 @@ import javax.persistence.Column;
 @AllArgsConstructor
 public class UserChangeActivationRequest {
 
-    @Column(nullable = false)
+    @NotNull
     private Integer id;
 
-    @Column(nullable = false)
+    @NotNull
     private Boolean active;
 }
