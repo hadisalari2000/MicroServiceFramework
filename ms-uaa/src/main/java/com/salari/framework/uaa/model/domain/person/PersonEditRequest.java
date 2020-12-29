@@ -1,22 +1,18 @@
-package com.salari.framework.uaa.model.entity;
-import com.salari.framework.uaa.model.entity.base.BaseEntity;
+package com.salari.framework.uaa.model.domain.person;
 import com.salari.framework.uaa.model.enums.Genders;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
-import org.hibernate.annotations.Where;
 import javax.persistence.*;
 
 @Data
-@SuperBuilder
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = true)
-@Entity
-@Table(name="persons")
-@Where(clause = "deleted=false")
-public class Person extends BaseEntity<Integer> {
+public class PersonEditRequest {
 
-    @Column(length = 10,nullable = false,unique = true)
+    @Column(nullable = false)
+    private Integer id;
+
+    @Column(length = 10,nullable = false)
     private String nationalCode;
 
     @Column(length = 20,nullable = false)
@@ -36,7 +32,4 @@ public class Person extends BaseEntity<Integer> {
 
     @Column(nullable = false)
     private Long birthDate;
-
-    @OneToOne(mappedBy = "person")
-    private User user;
 }

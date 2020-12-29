@@ -1,7 +1,5 @@
-package com.salari.framework.uaa.model.base.entity;
-
+package com.salari.framework.uaa.model.entity.base;
 import lombok.experimental.SuperBuilder;
-
 import javax.persistence.*;
 
 @SuperBuilder

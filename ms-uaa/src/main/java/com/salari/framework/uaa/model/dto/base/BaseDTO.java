@@ -1,9 +1,5 @@
-package com.salari.framework.uaa.model.base.dto;
-
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+package com.salari.framework.uaa.model.dto.base;
+import lombok.*;
 
 @Data
 @Builder

@@ -1,12 +1,8 @@
 package com.salari.framework.uaa.model.entity;
-
-import com.salari.framework.uaa.model.base.entity.BaseEntity;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import com.salari.framework.uaa.model.entity.base.BaseEntity;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
-
+import org.hibernate.annotations.Where;
 import javax.persistence.*;
 import java.util.Set;
 
@@ -17,6 +13,7 @@ import java.util.Set;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "users")
+@Where(clause = "deleted=false")
 public class User extends BaseEntity<Integer> {
 
     @Column(length = 20,nullable = false,unique = true)

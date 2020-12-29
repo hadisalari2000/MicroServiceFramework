@@ -1,7 +1,5 @@
-package com.salari.framework.uaa.model.base.dto;
-
+package com.salari.framework.uaa.model.dto.base;
 import com.salari.framework.uaa.utility.ApplicationProperties;
-
 import java.util.HashSet;
 import java.util.Set;
 

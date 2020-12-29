@@ -1,14 +1,10 @@
 package com.salari.framework.uaa.model.entity;
-
-import com.salari.framework.uaa.model.base.entity.BaseEntity;
+import com.salari.framework.uaa.model.entity.base.BaseEntity;
 import com.salari.framework.uaa.model.enums.RoleTypes;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.ManyToMany;
-import javax.persistence.Table;
+import org.hibernate.annotations.Where;
+import javax.persistence.*;
 import java.util.Set;
 
 @Data
@@ -18,6 +14,7 @@ import java.util.Set;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name="roles")
+@Where(clause = "deleted=false")
 public class Role extends BaseEntity<Integer> {
 
     @Column(length = 50,nullable = false)
