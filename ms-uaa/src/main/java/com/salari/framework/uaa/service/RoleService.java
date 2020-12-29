@@ -1,11 +1,7 @@
 package com.salari.framework.uaa.service;
-
 import com.salari.framework.uaa.handler.exception.ServiceException;
-import com.salari.framework.uaa.model.domain.role.RoleAddRequest;
-import com.salari.framework.uaa.model.domain.role.RoleChangeActivationRequest;
-import com.salari.framework.uaa.model.domain.role.RoleEditRequest;
-import com.salari.framework.uaa.model.dto.base.BaseDTO;
-import com.salari.framework.uaa.model.dto.base.MetaDTO;
+import com.salari.framework.uaa.model.domain.role.*;
+import com.salari.framework.uaa.model.dto.base.*;
 import com.salari.framework.uaa.model.entity.Role;
 import com.salari.framework.uaa.model.enums.RoleTypes;
 import com.salari.framework.uaa.model.mapper.RoleMapper;
