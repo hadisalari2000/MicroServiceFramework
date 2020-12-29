@@ -37,8 +37,6 @@ public class UserService {
                 .build();
     }
 
-
-
     private User getExistUser(Integer userId){
         return userRepository.findById(userId)
                 .orElseThrow(()-> ServiceException.getInstance("user-not-found", HttpStatus.NOT_FOUND));
