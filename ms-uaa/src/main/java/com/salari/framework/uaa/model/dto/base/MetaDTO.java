@@ -1,8 +1,13 @@
 package com.salari.framework.uaa.model.dto.base;
 import com.salari.framework.uaa.utility.ApplicationProperties;
+import lombok.Builder;
+import lombok.Data;
+
 import java.util.HashSet;
 import java.util.Set;
 
+@Data
+@Builder
 public class MetaDTO {
 
     Set<MetaMapDTO> success;
