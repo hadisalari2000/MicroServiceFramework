@@ -28,7 +28,7 @@ public class UserService {
     }
 
     public BaseDTO getByUsername(String username){
-        User user=userRepository.findByUsername(username)
+        User user=userRepository.findByUsernameIgnoreCase(username)
                 .orElseThrow(()->ServiceException.getInstance("user-not-found",HttpStatus.NOT_FOUND));
 
         return BaseDTO.builder()

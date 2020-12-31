@@ -51,7 +51,7 @@ public class RoleService {
                 .build();
     }
 
-    public BaseDTO getAllByUserId(Integer userId){
+    public BaseDTO getUserRoles(Integer userId){
         List<Role> roles=roleRepository.findAllByUsers_Id(userId)
                 .orElseThrow(()->ServiceException.getInstance("role-not-found",HttpStatus.NOT_FOUND));
 
