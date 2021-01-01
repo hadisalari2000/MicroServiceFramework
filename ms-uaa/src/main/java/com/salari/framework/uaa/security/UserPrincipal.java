@@ -3,7 +3,6 @@ package com.salari.framework.uaa.security;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.salari.framework.uaa.model.entity.Role;
 import com.salari.framework.uaa.model.entity.User;
-import com.salari.framework.uaa.repository.RoleRepository;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -12,12 +11,12 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.salari.framework.uaa.service.GlobalClass.getUserRoles;
+
 @Data
 @Builder
 public class UserPrincipal implements UserDetails {
 
-
-    private static RoleRepository roleRepository;
     private Integer id;
     private String username;
     @JsonIgnore
@@ -25,8 +24,7 @@ public class UserPrincipal implements UserDetails {
     private Collection<? extends GrantedAuthority> authorities;
     private Collection<? extends UserPrincipalRole> roles;
 
-    public UserPrincipal(RoleRepository roleRepository,Integer id,String username,String password,Collection<? extends GrantedAuthority> authorities, Collection<? extends UserPrincipalRole> roles) {
-        this.roleRepository=roleRepository;
+    public UserPrincipal(Integer id, String username, String password, Collection<? extends GrantedAuthority> authorities, Collection<? extends UserPrincipalRole> roles) {
         this.id = id;
         this.username = username;
         this.password = password;
@@ -34,9 +32,10 @@ public class UserPrincipal implements UserDetails {
         this.roles = roles;
     }
 
+    @Synchronized
     public static UserPrincipal create(User user) {
 
-        Optional<List<Role>> userRoles = roleRepository.findAllByUsers_Id(user.getId());
+        Optional<List<Role>> userRoles = getUserRoles(user.getId());
         List<UserPrincipalRole> userPrincipalRoles=new ArrayList<>();
         List<GrantedAuthority> authorityList=new ArrayList<>();
 
@@ -54,6 +53,49 @@ public class UserPrincipal implements UserDetails {
                 .authorities(authorityList)
                 .roles(userPrincipalRoles)
                 .build();
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    @Override
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return authorities;
+    }
+
+    public void setAuthorities(Collection<? extends GrantedAuthority> authorities) {
+        this.authorities = authorities;
+    }
+
+    public Collection<? extends UserPrincipalRole> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Collection<? extends UserPrincipalRole> roles) {
+        this.roles = roles;
     }
 
     @Override

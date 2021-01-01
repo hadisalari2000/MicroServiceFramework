@@ -11,8 +11,6 @@ import com.salari.framework.uaa.model.entity.Api;
 import com.salari.framework.uaa.model.entity.User;
 import com.salari.framework.uaa.model.enums.HttpMethods;
 import com.salari.framework.uaa.model.enums.TokenTypes;
-import com.salari.framework.uaa.repository.ApiRepository;
-import com.salari.framework.uaa.repository.UserRepository;
 import com.salari.framework.uaa.utility.ApplicationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
@@ -31,25 +29,18 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Optional;
-import java.util.regex.Pattern;
 
+import static com.salari.framework.uaa.service.GlobalClass.*;
 import static org.hibernate.internal.util.StringHelper.isEmpty;
 
 @Configuration
 public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 
-
-    private final ApiRepository apiRepository;
-    private final UserRepository userRepository;
     private final CustomUserDetailsService customUserDetailsService;
-    private final JwtTokenProvider jwtTokenProvider;
 
-    public JwtAuthenticationFilter(AuthenticationManager authenticationManager, CustomUserDetailsService customUserDetailsService, ApiRepository apiRepository, UserRepository userRepository, JwtTokenProvider jwtTokenProvider) {
+    public JwtAuthenticationFilter(AuthenticationManager authenticationManager, CustomUserDetailsService customUserDetailsService) {
         super(authenticationManager);
         this.customUserDetailsService = customUserDetailsService;
-        this.apiRepository = apiRepository;
-        this.userRepository = userRepository;
-        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     @Override
@@ -72,7 +63,7 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         String url = request.getParameter("url");
         String method = request.getParameter("method");
 
-        Optional<Api> api = apiRepository.findApiByUrlAndMethod(url, HttpMethods.valueOf(method));
+        Optional<Api> api = getApiByUrlAndMethod(url, HttpMethods.valueOf(method));
         if (!api.isPresent()) {
             authorizationException(response, "not_found_url", HttpStatus.NOT_FOUND);
             chain.doFilter(request, response);
@@ -115,14 +106,5 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         return true;
     }
 
-    private User getCurrentUser(TokenTypes tokenTypes) {
-        JwtUserDTO userToken = jwtTokenProvider.parseToken();
-        if (tokenTypes != null && !userToken.getType().equals(tokenTypes))
-            throw ServiceException.getInstance("unauthenticated_token", HttpStatus.UNAUTHORIZED);
-        Integer userId = userToken.getId();
-
-        return userRepository.findById(userId)
-                .orElseThrow(()->ServiceException.getInstance("user-not-found",HttpStatus.NOT_FOUND));
-    }
 }
 
