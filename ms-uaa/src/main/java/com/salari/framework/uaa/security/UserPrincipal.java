@@ -11,10 +11,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.salari.framework.uaa.service.GlobalClass.getUserRoles;
-
-@Data
-@Builder
 public class UserPrincipal implements UserDetails {
 
     private Integer id;
@@ -35,24 +31,24 @@ public class UserPrincipal implements UserDetails {
     @Synchronized
     public static UserPrincipal create(User user) {
 
-        Optional<List<Role>> userRoles = getUserRoles(user.getId());
+        Set<Role> userRoles = user.getRoles();
         List<UserPrincipalRole> userPrincipalRoles=new ArrayList<>();
         List<GrantedAuthority> authorityList=new ArrayList<>();
 
-        if(userRoles.isPresent()) {
-            authorityList = userRoles.get().stream().map(role -> new SimpleGrantedAuthority(role.getTitle())).collect(Collectors.toList());
+        if(!userRoles.isEmpty()) {
+            authorityList = userRoles.stream().map(role -> new SimpleGrantedAuthority(role.getTitle())).collect(Collectors.toList());
 
-            userPrincipalRoles = userRoles.get().stream()
+            userPrincipalRoles = userRoles.stream()
                     .map(role -> new UserPrincipalRole(role.getId(), role.getTitle(), role.getDescription(), null))
                     .collect(Collectors.toList());
         }
-        return UserPrincipal.builder()
-                .id(user.getId())
-                .username(user.getUsername())
-                .password(user.getPassword())
-                .authorities(authorityList)
-                .roles(userPrincipalRoles)
-                .build();
+        return new UserPrincipal(
+                user.getId(),
+                user.getUsername(),
+                user.getPassword(),
+                authorityList,
+                userPrincipalRoles
+        );
     }
 
     public Integer getId() {

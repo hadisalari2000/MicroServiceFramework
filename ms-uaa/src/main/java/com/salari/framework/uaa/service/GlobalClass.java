@@ -25,15 +25,13 @@ public class GlobalClass {
     public static RoleRepository roleRepository;
     public static ApiRepository apiRepository;
     public static UserRepository userRepository;
-    private static JwtTokenProvider jwtTokenProvider;
 
-    public GlobalClass(RoleRepository roleRepository,ApiRepository apiRepository,UserRepository userRepository,JwtTokenProvider jwtTokenProvider) {
+    public GlobalClass(RoleRepository roleRepository,ApiRepository apiRepository,UserRepository userRepository) {
         GlobalClass.roleRepository=roleRepository;
         GlobalClass.apiRepository=apiRepository;
         GlobalClass.userRepository=userRepository;
-        GlobalClass.jwtTokenProvider=jwtTokenProvider;
     }
-
+/*
     @Synchronized
     public static Optional<List<Role>> getUserRoles(Integer userId) {
         return roleRepository.findAllByUsers_Id(userId);
@@ -48,16 +46,5 @@ public class GlobalClass {
     public static User getUserById(Integer userId) {
         return userRepository.findById(userId)
                 .orElseThrow(()->ServiceException.getInstance("user-not-found",HttpStatus.NOT_FOUND));
-    }
-
-    @Synchronized
-    public static User getCurrentUser(TokenTypes tokenTypes) {
-        JwtUserDTO userToken = jwtTokenProvider.parseToken();
-        if (tokenTypes != null && !userToken.getType().equals(tokenTypes))
-            throw ServiceException.getInstance("unauthenticated_token", HttpStatus.UNAUTHORIZED);
-        Integer userId = userToken.getId();
-
-        return getUserById(userId);
-
-    }
+    }*/
 }
