@@ -8,22 +8,9 @@ import org.joda.time.DateTime;
 
 import java.util.UUID;
 
-/**
- * convenience class to generate a token for testing your requests.
- * Make sure the used secret here matches the on in your application.yml
- *
- * @author pascal alma
- */
 public class JwtTokenGenerator {
 
-    /**
-     * Generates a JWT token containing username as subject, and userId and role as additional claims. These properties are taken from the specified
-     * User object. Tokens validity is infinite.
-     *
-     * @param u the user for which the token will be generated
-     * @return the JWT token
-     */
-    public static String generateToken(JwtUserDTO u, String secret) {
+    static String generateToken(JwtUserDTO u, String secret) {
         Claims claims = Jwts.claims().setSubject(u.getId().toString());
         claims.put("role", u.getRoles());
         claims.put("type", u.getType());
@@ -39,7 +26,6 @@ public class JwtTokenGenerator {
                 .signWith(SignatureAlgorithm.HS256, secret)
                 .compact();
     }
-
 
     public static String generateRefreshToken(JwtUserDTO u, String secret) {
         Claims claims = Jwts.claims().setSubject(u.getId().toString());
@@ -57,10 +43,7 @@ public class JwtTokenGenerator {
                 .compact();
     }
 
-    /**
-     * @param args
-     */
-    public static void main(String[] args) {
+    //public static void main(String[] args) {
 
 //        JwtUserDTO user = new JwtUserDTO();
 //        user.setRoles("admin");
@@ -78,5 +61,5 @@ public class JwtTokenGenerator {
 //        System.out.println(user.getUserId());
 //        System.out.println(user.getType());
 //        System.out.println(user.getJti());
-    }
+    //}
 }

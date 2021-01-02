@@ -61,7 +61,7 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
             return;
         }
         try {
-            String jwt = header.substring(7, header.length());
+            String jwt = header.substring(7);
             if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
                 String subject = tokenProvider.getSubjectFromJWT(jwt);
                 if (subject.equals("INTERNAL_TRUSTED_TOKEN")) {
@@ -88,7 +88,7 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
                     }
 
                     if (!api.get().getPublicAccess()) {
-                        if (!checkCurrentUserHavePermission(api.get().getId())) {
+                        if (!checkCurrentUserHavePermission(user,api.get().getId())) {
                             authorizationException(response, "unauthorized_api", HttpStatus.UNAUTHORIZED);
                             chain.doFilter(request, response);
                             return;
@@ -125,7 +125,7 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         out.flush();
     }
 
-    private Boolean checkCurrentUserHavePermission(Integer apiId) {
+    private Boolean checkCurrentUserHavePermission(User user,Integer apiId) {
         return true;
     }
 

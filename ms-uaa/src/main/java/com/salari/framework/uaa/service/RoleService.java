@@ -3,6 +3,7 @@ import com.salari.framework.uaa.handler.exception.ServiceException;
 import com.salari.framework.uaa.model.domain.role.*;
 import com.salari.framework.uaa.model.dto.base.*;
 import com.salari.framework.uaa.model.entity.Role;
+import com.salari.framework.uaa.model.entity.User;
 import com.salari.framework.uaa.model.enums.RoleTypes;
 import com.salari.framework.uaa.model.mapper.RoleMapper;
 import com.salari.framework.uaa.repository.RoleRepository;
@@ -59,6 +60,20 @@ public class RoleService {
                 .metaDTO(MetaDTO.getInstance())
                 .data(roles.stream().map(roleMapper::ROLE_DTO))
                 .build();
+    }
+
+    public Role getLastUserRole(User user) {
+        List<Role> userRoles =roleRepository.findAllByUsers_Id(user.getId())
+                .orElseThrow(()->ServiceException.getInstance("role-not-found",HttpStatus.NOT_FOUND));
+
+        Role lastUserRole=null;
+         if(userRoles.stream().findFirst().isPresent())
+             lastUserRole=userRoles.stream().findFirst().get();
+
+        if (user.getCurrentRoleId() != null) {
+            lastUserRole = userRoles.stream().filter(uRole -> uRole.getId().equals(user.getCurrentRoleId())).findFirst().orElse(lastUserRole);
+        }
+        return lastUserRole;
     }
 
     public BaseDTO getAllByRoleType(RoleTypes roleType){

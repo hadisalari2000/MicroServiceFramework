@@ -20,7 +20,7 @@ public class UserPrincipal implements UserDetails {
     private Collection<? extends GrantedAuthority> authorities;
     private Collection<? extends UserPrincipalRole> roles;
 
-    public UserPrincipal(Integer id, String username, String password, Collection<? extends GrantedAuthority> authorities, Collection<? extends UserPrincipalRole> roles) {
+    private UserPrincipal(Integer id, String username, String password, Collection<? extends GrantedAuthority> authorities, Collection<? extends UserPrincipalRole> roles) {
         this.id = id;
         this.username = username;
         this.password = password;
@@ -29,7 +29,7 @@ public class UserPrincipal implements UserDetails {
     }
 
     @Synchronized
-    public static UserPrincipal create(User user) {
+    static UserPrincipal create(User user) {
 
         Set<Role> userRoles = user.getRoles();
         List<UserPrincipalRole> userPrincipalRoles=new ArrayList<>();

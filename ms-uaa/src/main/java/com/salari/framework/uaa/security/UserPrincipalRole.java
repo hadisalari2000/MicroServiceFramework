@@ -1,7 +1,5 @@
 package com.salari.framework.uaa.security;
-
 import com.salari.framework.uaa.model.entity.Api;
-
 import java.util.List;
 
 public class UserPrincipalRole {
@@ -11,10 +9,7 @@ public class UserPrincipalRole {
     private String description;
     private List<Api> accesses;
 
-    public UserPrincipalRole() {
-    }
-
-    public UserPrincipalRole(Integer id, String title, String description, List<Api> accesses) {
+    UserPrincipalRole(Integer id, String title, String description, List<Api> accesses) {
         this.id = id;
         this.title = title;
         this.description = description;

@@ -1,8 +1,14 @@
 package com.salari.framework.uaa.model.domain.user;
+import lombok.*;
+
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class LoginRequest {
 
     @NotBlank

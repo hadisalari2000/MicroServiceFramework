@@ -35,4 +35,7 @@ public class Role extends BaseEntity<Integer> {
     @ToString.Exclude
     @ManyToMany(mappedBy = "roles")
     private Set<User> users;
+
+    @OneToMany(mappedBy = "role")
+    private Set<RolesTemplates> rolesTemplates;
 }

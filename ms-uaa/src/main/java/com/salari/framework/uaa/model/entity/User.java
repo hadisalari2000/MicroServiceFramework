@@ -29,7 +29,7 @@ public class User extends BaseEntity<Integer> {
     @JoinColumn(name="person_id",referencedColumnName = "id")
     private Person person;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Integer currentRoleId;
 
     @Column(nullable = true)

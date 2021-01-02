@@ -8,6 +8,7 @@ import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import javax.validation.constraints.Size;
+import java.util.Set;
 
 @Data
 @SuperBuilder
@@ -35,5 +36,8 @@ public class Api extends BaseEntity<Integer> {
 
     @Builder.Default
     private Boolean active = true;
+
+    @OneToMany(mappedBy = "api")
+    private Set<TemplatePermission> templatePermissions;
 
 }

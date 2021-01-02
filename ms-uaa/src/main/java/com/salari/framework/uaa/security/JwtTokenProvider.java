@@ -4,6 +4,7 @@ import com.salari.framework.uaa.model.enums.TokenTypes;
 import com.salari.framework.uaa.utility.ApplicationProperties;
 import io.jsonwebtoken.*;
 import com.salari.framework.uaa.model.dto.user.JwtUserDTO;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,7 +12,6 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
@@ -26,16 +26,22 @@ public class JwtTokenProvider {
     @Value("${app.jwtSecret}")
     private String jwtSecret;
 
+    @Value("${jwt.token.expiration.time-minute}")
+    private Integer tokenExpirationTime;
+
+    @Value("${jwt.refresh.expiration.time-hour}")
+    private Integer refreshExpirationTime;
+
+    @Value("${jwt.password.expiration.time-minute}")
+    private Integer passwordExpirationTime;
+
     @Value("${app.jwtExpirationInMs}")
     private int jwtExpirationInMs;
 
     public String generateToken(Authentication authentication) {
-
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
-
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
-
         return Jwts.builder()
                 .setSubject(Long.toString(userPrincipal.getId()))
                 .setIssuedAt(new Date())
@@ -44,29 +50,41 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    public Integer getUserIdFromJWT(String token) {
-        //get jwt from token
+    private String generateToken(JwtUserDTO user, String secret) {
+        Claims claims = Jwts.claims().setSubject(user.getId().toString());
+        claims.put("role", user.getRoleId());
+        claims.put("type", user.getType());
+        claims.put("jti", user.getJti());
+        claims.put("expiration", user.getExpiration());
+
+        DateTime currentTime = new DateTime();
+        return Jwts.builder()
+                .setClaims(claims)
+                .setId(UUID.randomUUID().toString())
+                .setIssuedAt(currentTime.toDate())
+                .signWith(SignatureAlgorithm.HS256, secret)
+                .compact();
+    }
+
+    Integer getUserIdFromJWT(String token) {
         token = token.trim().replaceFirst("(?i)bearer ", "");
         Claims claims = Jwts.parser()
                 .setSigningKey(jwtSecret)
                 .parseClaimsJws(token)
                 .getBody();
-
         return Integer.parseInt(claims.getSubject());
     }
 
-    public String getSubjectFromJWT(String token) {
-        //get jwt from token
+    String getSubjectFromJWT(String token) {
         token = token.trim().replaceFirst("(?i)bearer ", "");
         Claims claims = Jwts.parser()
                 .setSigningKey(jwtSecret)
                 .parseClaimsJws(token)
                 .getBody();
-
         return claims.getSubject();
     }
 
-    public boolean validateToken(String authToken) {
+    boolean validateToken(String authToken) {
         try {
             Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(authToken);
             return true;
@@ -85,6 +103,30 @@ public class JwtTokenProvider {
     }
 
 
+    public String generateJwtToken(Integer userId, Integer roleId, TokenTypes tokenTypes) {
+        Calendar calendar = Calendar.getInstance();
+        switch (tokenTypes)
+        {
+            case TOKEN:
+                calendar.add(Calendar.MINUTE,tokenExpirationTime);
+                break;
+            case REFRESH:
+                calendar.add(Calendar.HOUR,refreshExpirationTime);
+                break;
+            case PASSWORD:
+                calendar.add(Calendar.MINUTE,passwordExpirationTime);
+                break;
+        }
+        JwtUserDTO jwtUserDTO = JwtUserDTO.builder()
+                .expiration(calendar.getTimeInMillis())
+                .id(userId)
+                .roleId(roleId)
+                .jti(UUID.randomUUID().toString())
+                .type(tokenTypes)
+                .build();
+        return generateToken(jwtUserDTO, jwtSecret);
+    }
+
     public String generateJwtToken(User userAccount, String jwtType) {
         Calendar calendar = Calendar.getInstance();
         if (jwtType.equalsIgnoreCase(ApplicationProperties.getProperty("jwt.type.token"))) {
@@ -101,9 +143,6 @@ public class JwtTokenProvider {
                 .build();
         return JwtTokenGenerator.generateToken(jwtUserDTO, ApplicationProperties.getProperty("secret"));
     }
-
-
-
 }
 
 
