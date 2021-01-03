@@ -26,7 +26,7 @@ public class PersonService {
     public BaseDTO getPerson(Integer id){
         Person person=getExistPerson(id);
         return BaseDTO.builder()
-                .metaDTO(MetaDTO.getInstance())
+                .meta(MetaDTO.getInstance())
                 .data(personMapper.PERSON_DTO(person))
                 .build();
     }
@@ -48,7 +48,7 @@ public class PersonService {
         personRepository.save(person);
 
         return BaseDTO.builder()
-                .metaDTO(MetaDTO.getInstance())
+                .meta(MetaDTO.getInstance())
                 .data(personMapper.PERSON_DTO(person))
                 .build();
     }
@@ -70,7 +70,7 @@ public class PersonService {
         personRepository.save(person);
 
         return BaseDTO.builder()
-                .metaDTO(MetaDTO.getInstance())
+                .meta(MetaDTO.getInstance())
                 .data(personMapper.PERSON_DTO(person))
                 .build();
     }
@@ -79,7 +79,7 @@ public class PersonService {
         Person person=getExistPerson(id);
         personRepository.delete(person);
         return BaseDTO.builder()
-                .metaDTO(MetaDTO.getInstance())
+                .meta(MetaDTO.getInstance())
                 .data(null)
                 .build();
     }

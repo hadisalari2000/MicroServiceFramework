@@ -40,4 +40,7 @@ public class Api extends BaseEntity<Integer> {
     @OneToMany(mappedBy = "api")
     private Set<TemplatePermission> templatePermissions;
 
+    @OneToMany(mappedBy = "api")
+    private Set<RolePermission> rolePermissions;
+
 }

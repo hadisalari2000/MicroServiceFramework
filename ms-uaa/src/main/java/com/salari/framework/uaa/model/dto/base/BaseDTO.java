@@ -8,9 +8,9 @@ import lombok.*;
 public class BaseDTO<T> {
 
     private T data;
-    private MetaDTO metaDTO;
+    private MetaDTO meta;
 
-    public BaseDTO(MetaDTO metaDTO) {
-        this.metaDTO = metaDTO;
+    public BaseDTO(MetaDTO meta) {
+        this.meta = meta;
     }
 }

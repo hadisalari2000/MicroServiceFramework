@@ -1,7 +1,9 @@
 package com.salari.framework.uaa.security;
+import com.salari.framework.uaa.handler.exception.ServiceException;
 import com.salari.framework.uaa.model.entity.User;
 import com.salari.framework.uaa.model.enums.TokenTypes;
 import com.salari.framework.uaa.utility.ApplicationProperties;
+import com.salari.framework.uaa.utility.ApplicationUtilities;
 import io.jsonwebtoken.*;
 import com.salari.framework.uaa.model.dto.user.JwtUserDTO;
 import org.joda.time.DateTime;
@@ -9,9 +11,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
@@ -102,6 +106,21 @@ public class JwtTokenProvider {
         return false;
     }
 
+    public JwtUserDTO parseToken() {
+        HttpServletRequest request = ApplicationUtilities.getInstance().getCurrentHttpRequest();
+        String jwt = getJwtTokenFromRequest(request);
+        JwtUserDTO jwtUserDTO = new JwtUserDTO();
+        Claims body = Jwts.parser()
+                .setSigningKey(jwtSecret)
+                .parseClaimsJws(jwt)
+                .getBody();
+        jwtUserDTO.setId(Integer.parseInt(body.getSubject()));
+        jwtUserDTO.setRoleId((Integer) (body.get("role")));
+        jwtUserDTO.setExpiration((Long) body.get("expiration"));
+        jwtUserDTO.setType(TokenTypes.valueOf((String) body.get("type")));
+        jwtUserDTO.setJti((String) body.get("jti"));
+        return jwtUserDTO;
+    }
 
     public String generateJwtToken(Integer userId, Integer roleId, TokenTypes tokenTypes) {
         Calendar calendar = Calendar.getInstance();
@@ -112,9 +131,6 @@ public class JwtTokenProvider {
                 break;
             case REFRESH:
                 calendar.add(Calendar.HOUR,refreshExpirationTime);
-                break;
-            case PASSWORD:
-                calendar.add(Calendar.MINUTE,passwordExpirationTime);
                 break;
         }
         JwtUserDTO jwtUserDTO = JwtUserDTO.builder()
@@ -143,6 +159,33 @@ public class JwtTokenProvider {
                 .build();
         return JwtTokenGenerator.generateToken(jwtUserDTO, ApplicationProperties.getProperty("secret"));
     }
+
+    private String getJwtTokenFromRequest(HttpServletRequest request) {
+        if (request.getHeader("Authorization") == null)
+            throw ServiceException.getInstance("unauthenticated_expired", HttpStatus.UNAUTHORIZED);
+        String bearerToken = request.getHeader("Authorization");
+        if (bearerToken.isEmpty() || !bearerToken.startsWith("Bearer "))
+            throw ServiceException.getInstance("unauthenticated_token", HttpStatus.UNAUTHORIZED);
+        String jwt = bearerToken.substring(7);
+        String exceptionKey = "unauthenticated_invalid";
+        try {
+            Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(jwt);
+            return jwt;
+        } catch (SignatureException ex) {
+            logger.error("Invalid JWT signature");
+        } catch (MalformedJwtException ex) {
+            logger.error("Invalid JWT token");
+        } catch (ExpiredJwtException ex) {
+            exceptionKey = "unauthenticated_expired";
+            logger.error("Expired JWT token");
+        } catch (UnsupportedJwtException ex) {
+            logger.error("Unsupported JWT token");
+        } catch (IllegalArgumentException ex) {
+            logger.error("JWT claims string is empty.");
+        }
+        throw ServiceException.getInstance(exceptionKey, HttpStatus.UNAUTHORIZED);
+    }
+
 }
 
 

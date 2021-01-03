@@ -27,7 +27,7 @@ public class RoleService {
     public BaseDTO get(Integer id){
         Role role=getExistRole(id);
         return BaseDTO.builder()
-                .metaDTO(MetaDTO.getInstance())
+                .meta(MetaDTO.getInstance())
                 .data(roleMapper.ROLE_DTO(role))
                 .build();
     }
@@ -36,7 +36,7 @@ public class RoleService {
         Role role=roleRepository.findByKey(key)
                 .orElseThrow(()->ServiceException.getInstance("role-not-found",HttpStatus.NOT_FOUND));
         return BaseDTO.builder()
-                .metaDTO(MetaDTO.getInstance())
+                .meta(MetaDTO.getInstance())
                 .data(roleMapper.ROLE_DTO(role))
                 .build();
     }
@@ -47,7 +47,7 @@ public class RoleService {
                 .orElseThrow(()->ServiceException.getInstance("role-not-found",HttpStatus.NOT_FOUND));
 
         return BaseDTO.builder()
-                .metaDTO(MetaDTO.getInstance())
+                .meta(MetaDTO.getInstance())
                 .data(roles.stream().map(roleMapper::ROLE_DTO))
                 .build();
     }
@@ -57,7 +57,7 @@ public class RoleService {
                 .orElseThrow(()->ServiceException.getInstance("role-not-found",HttpStatus.NOT_FOUND));
 
         return BaseDTO.builder()
-                .metaDTO(MetaDTO.getInstance())
+                .meta(MetaDTO.getInstance())
                 .data(roles.stream().map(roleMapper::ROLE_DTO))
                 .build();
     }
@@ -81,7 +81,7 @@ public class RoleService {
                 .orElseThrow(()->ServiceException.getInstance("role-not-found",HttpStatus.NOT_FOUND));
 
         return BaseDTO.builder()
-                .metaDTO(MetaDTO.getInstance())
+                .meta(MetaDTO.getInstance())
                 .data(roles.stream().map(roleMapper::ROLE_DTO))
                 .build();
     }
@@ -100,7 +100,7 @@ public class RoleService {
         roleRepository.save(role);
 
         return BaseDTO.builder()
-                .metaDTO(MetaDTO.getInstance())
+                .meta(MetaDTO.getInstance())
                 .data(roleMapper.ROLE_DTO(role))
                 .build();
     }
@@ -119,7 +119,7 @@ public class RoleService {
         roleRepository.save(role);
 
         return BaseDTO.builder()
-                .metaDTO(MetaDTO.getInstance())
+                .meta(MetaDTO.getInstance())
                 .data(roleMapper.ROLE_DTO(role))
                 .build();
     }
@@ -128,7 +128,7 @@ public class RoleService {
         Role role=getExistRole(id);
         roleRepository.delete(role);
         return BaseDTO.builder()
-                .metaDTO(MetaDTO.getInstance())
+                .meta(MetaDTO.getInstance())
                 .data(null)
                 .build();
     }
@@ -139,11 +139,11 @@ public class RoleService {
         roleRepository.save(role);
 
         return BaseDTO.builder()
-                .metaDTO(MetaDTO.getInstance())
+                .meta(MetaDTO.getInstance())
                 .data(roleMapper.ROLE_DTO(role))
                 .build();
     }
-    
+
     private Role getExistRole(Integer roleId){
         return roleRepository.findById(roleId)
                 .orElseThrow(()-> ServiceException.getInstance("role-not-found", HttpStatus.NOT_FOUND));

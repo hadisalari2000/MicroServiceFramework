@@ -32,8 +32,6 @@ public class JwtTokenGenerator {
         claims.put("role", u.getRoles());
         claims.put("type", u.getType());
         claims.put("jti", u.getJti());
-
-
         DateTime currentTime = new DateTime();
         return Jwts.builder()
                 .setClaims(claims)

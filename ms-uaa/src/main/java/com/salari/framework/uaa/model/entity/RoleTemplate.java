@@ -13,7 +13,7 @@ import javax.persistence.*;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name="rolesTemplates")
-public class RolesTemplates extends SimpleBaseEntity<Integer> {
+public class RoleTemplate extends SimpleBaseEntity<Integer> {
 
     @Column(name="role_id" ,nullable = false)
     private Integer roleId;

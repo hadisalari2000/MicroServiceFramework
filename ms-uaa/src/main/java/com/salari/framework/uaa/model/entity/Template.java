@@ -19,7 +19,7 @@ public class Template extends SimpleBaseEntity<Integer> {
     private String title;
 
     @OneToMany(mappedBy = "template")
-    private Set<RolesTemplates> rolesTemplates;
+    private Set<RoleTemplate> roleTemplates;
 
     @OneToMany(mappedBy = "template")
     private Set<TemplatePermission> templatePermissions;

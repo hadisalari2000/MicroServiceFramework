@@ -37,5 +37,8 @@ public class Role extends BaseEntity<Integer> {
     private Set<User> users;
 
     @OneToMany(mappedBy = "role")
-    private Set<RolesTemplates> rolesTemplates;
+    private Set<RoleTemplate> rolesTemplates;
+
+    @OneToMany(mappedBy = "role")
+    private Set<RolePermission> rolePermissions;
 }

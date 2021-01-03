@@ -100,11 +100,11 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
                     }
                 }
             } else {
-                throw ServiceException.getInstance("user-un-authorized", HttpStatus.UNAUTHORIZED);
+                throw ServiceException.getInstance("user-unauthorized", HttpStatus.UNAUTHORIZED);
             }
         } catch (Exception ex) {
 
-            throw ServiceException.getInstance("user-un-authorized", HttpStatus.UNAUTHORIZED);
+            throw ServiceException.getInstance("user-unauthorized", HttpStatus.UNAUTHORIZED);
         }
         chain.doFilter(request, response);
     }
@@ -116,7 +116,7 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         ObjectMapper mapper = new ObjectMapper();
         PrintWriter out = response.getWriter();
         out.print(mapper.writeValueAsString(
-                BaseDTO.builder().metaDTO(
+                BaseDTO.builder().meta(
                         MetaDTO.builder()
                                 .errors(BaseDTOMapper.getInstance().setMetaDTOCollection(null, MetaMapDTO.builder().key(errorKey).message(ApplicationProperties.getProperty(errorKey)).build()))
                                 .warnings(null).build())

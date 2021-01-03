@@ -25,6 +25,9 @@ public class User extends BaseEntity<Integer> {
     @Column(nullable = false)
     private Boolean active=true;
 
+    @Column(nullable = false, name = "person_id")
+    private Integer personId;
+
     @OneToOne(cascade=CascadeType.ALL)
     @JoinColumn(name="person_id",referencedColumnName = "id")
     private Person person;

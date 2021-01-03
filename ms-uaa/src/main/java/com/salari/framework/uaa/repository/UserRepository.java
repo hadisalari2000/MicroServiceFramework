@@ -13,6 +13,7 @@ public interface UserRepository extends JpaRepository<User,Integer> {
 
     Optional<User> findById(Integer id);
     Optional<User> findByUsernameIgnoreCase(String username);
+    Boolean existsByPersonId(Integer personId);
     Optional<User> findByUsernameAndPassword(String username,String password);
     Optional<User> findUserByPerson_Id(Integer id);
     List<User> findAllByActive(Boolean active);

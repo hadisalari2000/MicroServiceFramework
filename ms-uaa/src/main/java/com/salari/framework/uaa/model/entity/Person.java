@@ -19,13 +19,13 @@ public class Person extends BaseEntity<Integer> {
     @Column(length = 10,nullable = false,unique = true)
     private String nationalCode;
 
-    @Column(length = 20,nullable = false)
+    @Column(length = 20)
     private String firstName;
 
-    @Column(length = 20,nullable = false)
+    @Column(length = 20)
     private String lastName;
 
-    @Column(length = 20,nullable = false)
+    @Column(length = 20)
     private String fatherName;
 
     @Enumerated(EnumType.STRING)
@@ -36,7 +36,4 @@ public class Person extends BaseEntity<Integer> {
 
     @Column(nullable = false)
     private Long birthDate;
-
-    @OneToOne(mappedBy = "person")
-    private User user;
 }
