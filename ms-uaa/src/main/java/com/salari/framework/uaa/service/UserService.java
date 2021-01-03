@@ -1,21 +1,24 @@
 package com.salari.framework.uaa.service;
 
 import com.salari.framework.uaa.handler.exception.ServiceException;
-import com.salari.framework.uaa.model.domain.user.LoginRequest;
-import com.salari.framework.uaa.model.domain.user.UserRegisterRequest;
-import com.salari.framework.uaa.model.domain.user.UserVerificationRequest;
+import com.salari.framework.uaa.model.domain.user.*;
 import com.salari.framework.uaa.model.dto.base.BaseDTO;
 import com.salari.framework.uaa.model.dto.base.MetaDTO;
+import com.salari.framework.uaa.model.dto.base.PagerDTO;
 import com.salari.framework.uaa.model.dto.user.JwtUserDTO;
 import com.salari.framework.uaa.model.dto.user.LoginDTO;
+import com.salari.framework.uaa.model.dto.user.UserDTO;
 import com.salari.framework.uaa.model.dto.user.UserVerificationDTO;
 import com.salari.framework.uaa.model.entity.*;
 import com.salari.framework.uaa.model.enums.TokenTypes;
+import com.salari.framework.uaa.model.mapper.PersonMapper;
 import com.salari.framework.uaa.model.mapper.UserMapper;
 import com.salari.framework.uaa.model.mapper.UserVerificationMapper;
 import com.salari.framework.uaa.repository.*;
 import com.salari.framework.uaa.security.JwtTokenProvider;
+import com.salari.framework.uaa.utility.PageableUtility;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -41,20 +44,24 @@ public class UserService {
     private final RoleRepository roleRepository;
     private final UserVerificationRepository userVerificationRepository;
     private final UserMapper userMapper;
+    private final PersonMapper personMapper;
     private final UserVerificationMapper userVerificationMapper;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider tokenProvider;
+    private final PageableUtility pageableUtility;
 
-    public UserService(UserRepository userRepository, RolePermissionRepository rolePermissionRepository, PersonRepository personRepository, RoleRepository roleRepository, UserVerificationRepository userVerificationRepository, UserMapper userMapper, UserVerificationMapper userVerificationMapper, PasswordEncoder passwordEncoder, JwtTokenProvider tokenProvider) {
+    public UserService(UserRepository userRepository, RolePermissionRepository rolePermissionRepository, PersonRepository personRepository, RoleRepository roleRepository, UserVerificationRepository userVerificationRepository, UserMapper userMapper, PersonMapper personMapper, UserVerificationMapper userVerificationMapper, PasswordEncoder passwordEncoder, JwtTokenProvider tokenProvider, PageableUtility pageableUtility) {
         this.userRepository = userRepository;
         this.rolePermissionRepository = rolePermissionRepository;
         this.personRepository = personRepository;
         this.roleRepository = roleRepository;
         this.userVerificationRepository = userVerificationRepository;
         this.userMapper = userMapper;
+        this.personMapper = personMapper;
         this.userVerificationMapper = userVerificationMapper;
         this.passwordEncoder = passwordEncoder;
         this.tokenProvider = tokenProvider;
+        this.pageableUtility = pageableUtility;
     }
 
     public BaseDTO login(LoginRequest request) {
@@ -114,8 +121,8 @@ public class UserService {
         if (existPerson.isPresent() && userRepository.existsByPersonId(existPerson.get().getId()))
             throw ServiceException.getInstance("duplicate_user", HttpStatus.CONFLICT);
 
-        Person person=existPerson.orElse(Person.builder().build());
-        LoginDTO loginDTO=createUserAndLoginIt(person,request.getNationalCode(),request.getMobileNumber(),request.getBirthDate());
+        Person person = existPerson.orElse(Person.builder().build());
+        LoginDTO loginDTO = createUserAndLoginIt(person, request.getNationalCode(), request.getMobileNumber(), request.getBirthDate());
 
         return BaseDTO.builder()
                 .meta(MetaDTO.getInstance())
@@ -132,7 +139,7 @@ public class UserService {
         person = personRepository.save(person);
 
         Role newUserRole = roleRepository.findByKey("public")
-                .orElseThrow(()->ServiceException.getInstance("role-global-not-defined",HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> ServiceException.getInstance("role-global-not-defined", HttpStatus.NOT_FOUND));
 
         User user = User.builder()
                 .active(true)
@@ -158,7 +165,7 @@ public class UserService {
         if (person.isPresent() && userRepository.existsByPersonId(person.get().getId()))
             throw ServiceException.getInstance("duplicate_user", HttpStatus.CONFLICT);
 
-        UserVerificationDTO userVerificationDTO = generateVerificationCode(request);
+        UserVerificationDTO userVerificationDTO = generateVerificationCode(request.getNationalCode(), request.getMobileNumber(), request.getBirthDate());
 
         return BaseDTO.builder()
                 .meta(MetaDTO.getInstance())
@@ -166,16 +173,16 @@ public class UserService {
                 .build();
     }
 
-    public BaseDTO registerUserVerification(UserVerificationRequest request) {
+    public BaseDTO userVerification(UserVerificationRequest request) {
 
-        UserVerification userVerification = getUserVerificationExists(request.getKey(),request.getCode());
+        UserVerification userVerification = getUserVerificationExists(request.getKey(), request.getCode());
         Person person = personRepository.findByNationalCode(userVerification.getNationalCode()).orElse(Person.builder().build());
 
         if (userRepository.existsByPersonId(person.getId()))
             throw ServiceException.getInstance("duplicate_user", HttpStatus.CONFLICT);
 
-        LoginDTO loginDTO=createUserAndLoginIt(
-                person,userVerification.getNationalCode(),userVerification.getMobileNumber(),userVerification.getBirthDate());
+        LoginDTO loginDTO = createUserAndLoginIt(
+                person, userVerification.getNationalCode(), userVerification.getMobileNumber(), userVerification.getBirthDate());
 
         userVerificationRepository.deleteById(userVerification.getId());
 
@@ -185,11 +192,155 @@ public class UserService {
                 .build();
     }
 
-    public BaseDTO get(Integer id) {
+    public BaseDTO forgetPassword(PasswordForgetRequest request) {
+        User user = getUserByNationalCode(request.getNationalCode());
+        Person person = user.getPerson();
+        UserVerificationDTO userVerificationDTO = generateVerificationCode(person.getNationalCode(), person.getMobileNumber(), person.getBirthDate());
+        return BaseDTO.builder()
+                .meta(MetaDTO.getInstance())
+                .data(userVerificationDTO)
+                .build();
+    }
+
+    public BaseDTO forgetPasswordVerification(UserVerificationRequest request) {
+        UserVerification userVerification = getUserVerificationExists(request.getKey(), request.getCode());
+        User user = getUserByNationalCode(userVerification.getNationalCode());
+        LoginDTO loginDTO = LoginDTO.builder()
+                .accessToken(tokenProvider.generateJwtToken(user.getId(), user.getCurrentRoleId(), TokenTypes.TOKEN))
+                .build();
+        userVerificationRepository.deleteById(userVerification.getId());
+        return BaseDTO.builder()
+                .meta(MetaDTO.getInstance())
+                .data(loginDTO)
+                .build();
+    }
+
+    public BaseDTO resetPassword(PasswordResetRequest request) {
+        User user = getCurrentUser(TokenTypes.TOKEN);
+        passwordMatcher(request.getPassword(), request.getConfirmPassword());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        userRepository.save(user);
+
+        return BaseDTO.builder()
+                .meta(MetaDTO.getInstance())
+                .data(userMapper.USER_DTO(user))
+                .build();
+    }
+
+    public BaseDTO changePassword(PasswordChangeRequest request) {
+        User user = getCurrentUser(TokenTypes.TOKEN);
+
+        passwordMatcher(request.getPassword(), request.getConfirmPassword());
+
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            throw ServiceException.getInstance("invalid_old_password", HttpStatus.NOT_ACCEPTABLE);
+        }
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        userRepository.save(user);
+        return BaseDTO.builder()
+                .meta(MetaDTO.getInstance())
+                .data(null)
+                .build();
+    }
+
+    public BaseDTO getUserProfile() {
+        return BaseDTO.builder()
+                .meta(MetaDTO.getInstance())
+                .data(personMapper.PERSON_DTO(getCurrentUser().getPerson()))
+                .build();
+    }
+
+    public BaseDTO editUserProfile(UserEditProfileRequest request) {
+        User user = getCurrentUser();
+        Person person = user.getPerson();
+        person.setFirstName(request.getFirstName());
+        person.setLastName(request.getLastName());
+        person.setFatherName(request.getFatherName());
+        person.setGender(request.getGender());
+        person.setEmail(request.getEmail());
+        person = personRepository.save(person);
+
+        return BaseDTO.builder()
+                .meta(MetaDTO.getInstance())
+                .data(personMapper.PERSON_DTO(person))
+                .build();
+    }
+
+    public BaseDTO changeMobileNumber(UserEditMobileNumberRequest request) {
+        User user = getCurrentUser();
+        user.getPerson().setMobileNumber(request.getMobileNumber());
+        userRepository.save(user);
+        UserDTO userDTO = userMapper.USER_DTO(user);
+        userDTO.setPerson(personMapper.PERSON_DTO(user.getPerson()));
+        return BaseDTO.builder()
+                .meta(MetaDTO.getInstance())
+                .data(userDTO)
+                .build();
+    }
+
+    public BaseDTO changeRole(Integer roleId) {
+        User currentUser = getCurrentUser();
+        if (getUserRoles(currentUser.getId()).stream().noneMatch(role -> role.getId().equals(roleId)))
+            throw ServiceException.getInstance("invalid_role", HttpStatus.FORBIDDEN);
+
+        currentUser.setCurrentRoleId(roleId);
+        userRepository.save(currentUser);
+
+        LoginDTO loginDTO = LoginDTO.builder()
+                .accessToken(tokenProvider.generateJwtToken(currentUser.getId(), roleId, TokenTypes.TOKEN))
+                .refreshToken(tokenProvider.generateJwtToken(currentUser.getId(), roleId, TokenTypes.REFRESH))
+                .build();
+
+        return BaseDTO.builder()
+                .meta(MetaDTO.getInstance())
+                .data(loginDTO)
+                .build();
+    }
+
+    public BaseDTO getUserById(Integer id) {
         User user = getExistUser(id);
         return BaseDTO.builder()
                 .meta(MetaDTO.getInstance())
                 .data(userMapper.USER_DTO(user))
+                .build();
+    }
+
+    public BaseDTO changeUserStatus(UserChangeActivationRequest request) {
+
+        User user = userRepository.findById(request.getId())
+                .orElseThrow(() -> ServiceException.getInstance("user-not-found", HttpStatus.NOT_FOUND));
+
+        user.setActive(request.getActive());
+        userRepository.save(user);
+
+        return BaseDTO.builder()
+                .meta(MetaDTO.getInstance())
+                .data(userMapper.USER_DTO(user))
+                .build();
+    }
+
+    public BaseDTO deleteUser(Integer id) {
+        User user = getExistUser(id);
+        Person person = user.getPerson();
+
+        person.setDeleted(true);
+        personRepository.save(person);
+
+        user.setDeleted(true);
+        user.setRoles(null);
+        userRepository.save(user);
+
+        return BaseDTO.builder()
+                .meta(MetaDTO.getInstance())
+                .build();
+    }
+
+    public BaseDTO getUsersByFilter(UserFilterRequest request,Integer page) {
+        Page<User> users = userRepository.findUsersByFilters(request, pageableUtility.createPageable(page));
+        PagerDTO<UserDTO> pagerDTO = new PagerDTO<>(users.map(userMapper::USER_DTO));
+        return BaseDTO.builder()
+                .meta(MetaDTO.getInstance())
+                .data(pagerDTO)
                 .build();
     }
 
@@ -222,6 +373,10 @@ public class UserService {
                 .orElseThrow(() -> ServiceException.getInstance("invalid_credentials", HttpStatus.UNAUTHORIZED));
     }
 
+    private User getCurrentUser() {
+        return getCurrentUser(null);
+    }
+
     private User getCurrentUser(TokenTypes tokenTypes) {
         JwtUserDTO userToken = tokenProvider.parseToken();
         if (tokenTypes != null && !userToken.getType().equals(tokenTypes))
@@ -244,21 +399,20 @@ public class UserService {
         return roleRepository.findAllByUsers_Id(userId).orElseGet(ArrayList::new);
     }
 
-    private UserVerificationDTO generateVerificationCode(UserRegisterRequest user)
-    {
-        UserVerification userVerification = userVerificationRepository.findByNationalCode(user.getNationalCode())
+    private UserVerificationDTO generateVerificationCode(String nationalCode, String mobileNumber, Long birthDate) {
+        UserVerification userVerification = userVerificationRepository.findByNationalCode(nationalCode)
                 .orElse(UserVerification.builder().build());
 
-        userVerification.setNationalCode(user.getNationalCode());
-        userVerification.setMobileNumber(user.getMobileNumber());
-        userVerification.setBirthDate(user.getBirthDate());
+        userVerification.setNationalCode(nationalCode);
+        userVerification.setMobileNumber(mobileNumber);
+        userVerification.setBirthDate(birthDate);
 
         if (userVerification.getCode() == null || System.currentTimeMillis() > userVerification.getExpirationDate()) {
             userVerification.setKey(UUID.randomUUID());
             userVerification.setCode("12345");
             //TODO: uncomment after run sms server
             //userVerification.setCode(PasswordGenerator.generateRandomPinCode(5));
-            userVerification.setExpirationDate(System.currentTimeMillis()+(registerValidationCodeExpirationTime*60000L));
+            userVerification.setExpirationDate(System.currentTimeMillis() + (registerValidationCodeExpirationTime * 60000L));
         }
         userVerification = userVerificationRepository.save(userVerification);
         return userVerificationMapper.USER_VERIFICATION_DTO(userVerification);
@@ -268,5 +422,18 @@ public class UserService {
         return userVerificationRepository
                 .findByKeyAndCodeAndExpirationDateGreaterThan(key, code, System.currentTimeMillis())
                 .orElseThrow(() -> ServiceException.getInstance("not_found_user_verification_code", HttpStatus.BAD_REQUEST));
+    }
+
+    private User getUserByNationalCode(String nationalCode) {
+        Person person = personRepository.findByNationalCode(nationalCode)
+                .orElseThrow(() -> ServiceException.getInstance("person-not-found", HttpStatus.NOT_FOUND));
+        return userRepository.findByPersonId(person.getId())
+                .orElseThrow(() -> ServiceException.getInstance("user-not-found", HttpStatus.NOT_FOUND));
+    }
+
+    private void passwordMatcher(String password, String confirmPassword) {
+        if (!password.equals(confirmPassword)) {
+            throw ServiceException.getInstance("not_match_password", HttpStatus.NOT_ACCEPTABLE);
+        }
     }
 }

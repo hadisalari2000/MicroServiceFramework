@@ -1,9 +1,8 @@
 package com.salari.framework.uaa.controller;
 
-import com.salari.framework.uaa.model.domain.user.LoginRequest;
-import com.salari.framework.uaa.model.domain.user.UserRegisterRequest;
-import com.salari.framework.uaa.model.domain.user.UserVerificationRequest;
+import com.salari.framework.uaa.model.domain.user.*;
 import com.salari.framework.uaa.model.dto.base.BaseDTO;
+import com.salari.framework.uaa.model.enums.Genders;
 import com.salari.framework.uaa.service.UserService;
 import io.swagger.annotations.ApiParam;
 import org.springframework.http.HttpStatus;
@@ -49,32 +48,84 @@ public class UserController {
 
     @PutMapping("v1/user/verification")
     public ResponseEntity<BaseDTO> verification(@Valid @RequestBody UserVerificationRequest userVerificationBean) {
-        return new ResponseEntity<>(userService.registerUserVerification(userVerificationBean), HttpStatus.OK);
+        return new ResponseEntity<>(userService.userVerification(userVerificationBean), HttpStatus.OK);
     }
 
-    public ResponseEntity<BaseDTO> verification(){return null;}
+    @PostMapping("v1/user/password/forget")
+    public ResponseEntity<BaseDTO> forgetPassword(@Valid @RequestBody PasswordForgetRequest passwordForgetRequest) {
+        return new ResponseEntity<>(userService.forgetPassword(passwordForgetRequest), HttpStatus.OK);
+    }
 
-    public ResponseEntity<BaseDTO> changePassword(){return null;}
+    @PutMapping("v1/user/password/verification")
+    public ResponseEntity<BaseDTO> forgetPasswordVerification(@Valid @RequestBody UserVerificationRequest userVerificationRequest) {
+        return new ResponseEntity<>(userService.forgetPasswordVerification(userVerificationRequest), HttpStatus.OK);
+    }
 
-    public ResponseEntity<BaseDTO> resetPassword(){return null;}
+    @PutMapping("v1/user/password/reset")
+    public ResponseEntity<BaseDTO> resetPassword(@Valid @RequestBody PasswordResetRequest passwordResetRequest) {
+        return new ResponseEntity<>(userService.resetPassword(passwordResetRequest), HttpStatus.OK);
+    }
 
-    public ResponseEntity<BaseDTO> forgetPassword(){return null;}
+    @PutMapping("v1/user/password")
+    public ResponseEntity<BaseDTO> changePassword(@Valid @RequestBody PasswordChangeRequest passwordChangeRequest) {
+        return new ResponseEntity<>(userService.changePassword(passwordChangeRequest), HttpStatus.OK);
+    }
 
-    public ResponseEntity<BaseDTO> forgetPasswordVerification(){return null;}
+    @GetMapping("v1/user/profile")
+    public ResponseEntity<BaseDTO> getUserProfile() {
+        return new ResponseEntity<>(userService.getUserProfile(), HttpStatus.OK);
+    }
 
-    public ResponseEntity<BaseDTO> getUserProfile(){return null;}
+    @PutMapping("v1/user/profile")
+    public ResponseEntity<BaseDTO> editProfile(@Valid @RequestBody UserEditProfileRequest userEditProfileRequest) {
+        return new ResponseEntity<>(userService.editUserProfile(userEditProfileRequest), HttpStatus.OK);
+    }
 
-    public ResponseEntity<BaseDTO> editUserProfile(){return null;}
+    @PutMapping("v1/user/mobileNumber")
+    public ResponseEntity<BaseDTO> changeMobileNumber(@Valid @RequestBody UserEditMobileNumberRequest userEditMobileNumberRequest) {
+        return new ResponseEntity<>(userService.changeMobileNumber(userEditMobileNumberRequest), HttpStatus.OK);
+    }
 
-    public ResponseEntity<BaseDTO> changeRole(){return null;}
+    @GetMapping("v1/user/changeRole")
+    public ResponseEntity<BaseDTO> changeRole(@ApiParam(value = "roleId", name = "roleId") @RequestParam Integer roleId) {
+        return new ResponseEntity<>(userService.changeRole(roleId), HttpStatus.OK);
+    }
 
-    public ResponseEntity<BaseDTO> getUserById(){return null;}
+    @GetMapping("v1/user")
+    public ResponseEntity<BaseDTO> getUserById(@ApiParam(value = "id", name = "id") @RequestParam Integer id) {
+        return new ResponseEntity<>(userService.getUserById(id), HttpStatus.OK);
+    }
 
-    public ResponseEntity<BaseDTO> deleteUserById(){return null;}
+    @PutMapping("v1/users/status")
+    public ResponseEntity<BaseDTO> changeUsersStatus(@Valid @RequestBody UserChangeActivationRequest changeActivationRequest) {
+        return new ResponseEntity<>(userService.changeUserStatus(changeActivationRequest), HttpStatus.OK);
+    }
 
-    public ResponseEntity<BaseDTO> changeUserStatus(){return null;}
+    @DeleteMapping("v1/user")
+    public ResponseEntity<BaseDTO> deleteById(@Valid @ApiParam(value="id",name = "id") @RequestParam Integer id){
+        return new ResponseEntity<>(userService.deleteUser(id),HttpStatus.OK);
+    }
 
-    public ResponseEntity<BaseDTO> getAllUsers(){return null;}
-
-    public ResponseEntity<BaseDTO> getByFilter(){return null;}
+    @GetMapping("v1/users/filter")
+    public ResponseEntity<BaseDTO> getByFilterForAdmin(@ApiParam(value = "firstName", name = "firstName") @RequestParam(required = false) String firstName,
+                                                       @ApiParam(value = "lastName", name = "lastName") @RequestParam(required = false) String lastName,
+                                                       @ApiParam(value = "username", name = "username") @RequestParam(required = false) String username,
+                                                       @ApiParam(value = "nationalCode", name = "nationalCode") @RequestParam(required = false) String nationalCode,
+                                                       @ApiParam(value = "mobileNumber", name = "mobileNumber") @RequestParam(required = false) String mobileNumber,
+                                                       @ApiParam(value = "gender", name = "gender") @RequestParam(required = false) Genders gender,
+                                                       @ApiParam(value = "email", name = "email") @RequestParam(required = false) String email,
+                                                       @ApiParam(value = "roleId", name = "roleId") @RequestParam(required = false) Integer roleId,
+                                                       @ApiParam(value = "page", name = "page") @RequestParam Integer page) {
+        UserFilterRequest request = UserFilterRequest.builder()
+                .firstName(firstName)
+                .lastName(lastName)
+                .mobileNumber(mobileNumber)
+                .nationalCode(nationalCode)
+                .username(username)
+                .gender(gender)
+                .email(email)
+                .roleId(roleId)
+                .build();
+        return new ResponseEntity<>(userService.getUsersByFilter(request,page), HttpStatus.OK);
+    }
 }

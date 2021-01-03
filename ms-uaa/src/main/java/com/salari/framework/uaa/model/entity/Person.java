@@ -36,4 +36,7 @@ public class Person extends BaseEntity<Integer> {
 
     @Column(nullable = false)
     private Long birthDate;
+
+    @Column(length = 40)
+    private String email;
 }
