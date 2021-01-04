@@ -3,6 +3,7 @@ import com.salari.framework.uaa.model.dto.user.UserDTO;
 import com.salari.framework.uaa.model.enums.RoleTypes;
 import lombok.*;
 
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -15,5 +16,5 @@ public class RoleDTO {
     private String description;
     private Boolean active;
     private RoleTypes roleType;
-    private Set<UserDTO> users;
+    private List<UserDTO> users;
 }

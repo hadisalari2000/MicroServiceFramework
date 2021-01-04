@@ -14,6 +14,5 @@ public interface PersonRepository extends JpaRepository<Person,Integer> {
     Optional<Person> findByNationalCode(String nationalCode);
     Optional<Person> findByMobileNumber(String mobileNumber);
     Optional<Person> findByNationalCodeOrMobileNumber(String nationalCode,String mobileNumber);
-    Optional<Person> findByUser_Id(Integer userId);
     List<Person> findAllByIdIsNotNull();
 }

@@ -3,6 +3,7 @@ import com.salari.framework.uaa.model.dto.person.PersonDTO;
 import com.salari.framework.uaa.model.dto.role.RoleDTO;
 import lombok.*;
 
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -17,5 +18,5 @@ public class UserDTO {
     private Integer currentRoleId;
     private Long lastLoginTryDate;
     private Short loginFailedTryCount;
-    private Set<RoleDTO> roles;
+    private List<RoleDTO> roles;
 }

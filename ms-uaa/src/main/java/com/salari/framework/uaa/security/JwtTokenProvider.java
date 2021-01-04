@@ -27,7 +27,7 @@ public class JwtTokenProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
 
-    @Value("${app.jwtSecret}")
+    @Value("${jwt.secret}")
     private String jwtSecret;
 
     @Value("${jwt.token.expiration.time-minute}")
@@ -38,21 +38,6 @@ public class JwtTokenProvider {
 
     @Value("${jwt.password.expiration.time-minute}")
     private Integer passwordExpirationTime;
-
-    @Value("${app.jwtExpirationInMs}")
-    private int jwtExpirationInMs;
-
-    public String generateToken(Authentication authentication) {
-        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
-        Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
-        return Jwts.builder()
-                .setSubject(Long.toString(userPrincipal.getId()))
-                .setIssuedAt(new Date())
-                .setExpiration(expiryDate)
-                .signWith(SignatureAlgorithm.HS512, jwtSecret)
-                .compact();
-    }
 
     private String generateToken(JwtUserDTO user, String secret) {
         Claims claims = Jwts.claims().setSubject(user.getId().toString());
@@ -143,47 +128,21 @@ public class JwtTokenProvider {
         return generateToken(jwtUserDTO, jwtSecret);
     }
 
-    public String generateJwtToken(User userAccount, String jwtType) {
-        Calendar calendar = Calendar.getInstance();
-        if (jwtType.equalsIgnoreCase(ApplicationProperties.getProperty("jwt.type.token"))) {
-            calendar.add(Calendar.MINUTE, Integer.parseInt(ApplicationProperties.getProperty("jwt.expiration.time")));
-        } else {
-            calendar.add(Calendar.HOUR, Integer.parseInt(ApplicationProperties.getProperty("jwt.expiration.time.refresh")));
-        }
-        JwtUserDTO jwtUserDTO = JwtUserDTO.builder()
-                .expiration(calendar.getTimeInMillis())
-                .id(userAccount.getId())
-                .jti(UUID.randomUUID().toString())
-                .roles(userAccount.getRoles())
-                .type(TokenTypes.valueOf(ApplicationProperties.getProperty("jwt.type")))
-                .build();
-        return JwtTokenGenerator.generateToken(jwtUserDTO, ApplicationProperties.getProperty("secret"));
-    }
+    String getJwtTokenFromRequest(HttpServletRequest request) {
 
-    private String getJwtTokenFromRequest(HttpServletRequest request) {
         if (request.getHeader("Authorization") == null)
             throw ServiceException.getInstance("unauthenticated_expired", HttpStatus.UNAUTHORIZED);
+
         String bearerToken = request.getHeader("Authorization");
         if (bearerToken.isEmpty() || !bearerToken.startsWith("Bearer "))
             throw ServiceException.getInstance("unauthenticated_token", HttpStatus.UNAUTHORIZED);
+
         String jwt = bearerToken.substring(7);
-        String exceptionKey = "unauthenticated_invalid";
-        try {
-            Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(jwt);
-            return jwt;
-        } catch (SignatureException ex) {
-            logger.error("Invalid JWT signature");
-        } catch (MalformedJwtException ex) {
-            logger.error("Invalid JWT token");
-        } catch (ExpiredJwtException ex) {
-            exceptionKey = "unauthenticated_expired";
-            logger.error("Expired JWT token");
-        } catch (UnsupportedJwtException ex) {
-            logger.error("Unsupported JWT token");
-        } catch (IllegalArgumentException ex) {
-            logger.error("JWT claims string is empty.");
+        if (!validateToken(jwt)) {
+            throw ServiceException.getInstance("user-unauthorized", HttpStatus.UNAUTHORIZED);
         }
-        throw ServiceException.getInstance(exceptionKey, HttpStatus.UNAUTHORIZED);
+        Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(jwt);
+        return jwt;
     }
 
 }

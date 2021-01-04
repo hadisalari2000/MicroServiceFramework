@@ -12,7 +12,7 @@ import javax.persistence.*;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @Entity
-@Table(name="persons")
+@Table(name="person")
 @Where(clause = "deleted=false")
 public class Person extends BaseEntity<Integer> {
 

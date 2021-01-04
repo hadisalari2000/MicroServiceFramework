@@ -10,7 +10,7 @@ import javax.validation.constraints.*;
 public class UserRegisterRequest {
 
     @NotBlank
-    @Size(min=10,max=10)
+    @Size(min=11,max=11)
     @Pattern(regexp = "^09\\d{9}$")
     private String mobileNumber;
 

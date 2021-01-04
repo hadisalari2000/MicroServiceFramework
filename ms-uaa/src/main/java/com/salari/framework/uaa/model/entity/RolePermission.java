@@ -15,20 +15,20 @@ import javax.persistence.*;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @Entity
-@Table(name="Templates")
+@Table(name="role_permission")
 public class RolePermission extends SimpleBaseEntity<Integer> {
 
     @Column(name="api_id",nullable = false)
     private Integer apiId;
 
     @ManyToOne()
-    @JoinColumn(name = "api_id")
+    @JoinColumn(name = "api_id", insertable = false, updatable = false)
     private Api api;
 
     @Column(name="role_id",nullable = false)
     private Integer roleId;
 
     @ManyToOne()
-    @JoinColumn(name = "role_id")
+    @JoinColumn(name = "role_id", insertable = false, updatable = false)
     private Role role;
 }

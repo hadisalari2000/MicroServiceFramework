@@ -22,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -130,7 +131,8 @@ public class UserService {
                 .build();
     }
 
-    private LoginDTO createUserAndLoginIt(Person person, String nationalCode, String mobileNumber, Long birthDate) {
+    @Transactional
+    LoginDTO createUserAndLoginIt(Person person, String nationalCode, String mobileNumber, Long birthDate) {
 
         person.setNationalCode(nationalCode);
         person.setMobileNumber(mobileNumber);
@@ -148,9 +150,10 @@ public class UserService {
                 .password(passwordEncoder.encode(mobileNumber))
                 .personId(person.getId())
                 .currentRoleId(newUserRole.getId())
-                .username(person.getNationalCode()).build();
+                .username(person.getNationalCode())
+                .build();
         user = userRepository.save(user);
-        user.setRoles(Collections.singleton(newUserRole));
+        user.setRoles(Collections.singletonList(newUserRole));
         userRepository.save(user);
 
         return LoginDTO.builder()

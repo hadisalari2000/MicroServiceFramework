@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.Where;
 import javax.persistence.*;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -29,16 +30,19 @@ public class Role extends BaseEntity<Integer> {
     @Column(nullable = false)
     private Boolean active=true;
 
+    @Enumerated(value = EnumType.STRING)
     @Column(nullable = false)
     private RoleTypes roleType;
 
     @ToString.Exclude
     @ManyToMany(mappedBy = "roles")
-    private Set<User> users;
+    private List<User> users;
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "role")
-    private Set<RoleTemplate> rolesTemplates;
+    private List<RoleTemplate> rolesTemplates;
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "role")
-    private Set<RolePermission> rolePermissions;
+    private List<RolePermission> rolePermissions;
 }

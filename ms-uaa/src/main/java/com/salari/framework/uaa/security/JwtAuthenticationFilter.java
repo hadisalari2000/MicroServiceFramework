@@ -17,13 +17,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-import org.springframework.util.StringUtils;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -31,8 +28,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import static org.hibernate.internal.util.StringHelper.isEmpty;
@@ -60,51 +55,38 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
             chain.doFilter(request, response);
             return;
         }
-        try {
-            String jwt = header.substring(7);
-            if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
-                String subject = tokenProvider.getSubjectFromJWT(jwt);
-                if (subject.equals("INTERNAL_TRUSTED_TOKEN")) {
-                    List<GrantedAuthority> authorities = new ArrayList<>();
-                    authorities.add(new SimpleGrantedAuthority("ROLE_TRUSTED"));
-                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                            new org.springframework.security.core.userdetails.User("INTERNAL_TRUSTED_TOKEN", "", authorities),
-                            null,
-                            authorities
-                    );
-                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                } else {
-                    Integer userId = tokenProvider.getUserIdFromJWT(jwt);
-                    User user = customUserDetailsService.loadUserById(userId);
-                    String url = request.getParameter("url");
-                    String method = request.getParameter("method");
 
-                    Optional<Api> api = apiRepository.findApiByUrlAndMethod(url, HttpMethods.valueOf(method));
-                    if (!api.isPresent()) {
-                        authorizationException(response, "not_found_url", HttpStatus.NOT_FOUND);
-                        chain.doFilter(request, response);
-                        return;
-                    }
-
-                    if (!api.get().getPublicAccess()) {
-                        if (!checkCurrentUserHavePermission(user,api.get().getId())) {
-                            authorizationException(response, "unauthorized_api", HttpStatus.UNAUTHORIZED);
-                            chain.doFilter(request, response);
-                            return;
-                        }
-                        UserDetails userDetails = UserPrincipal.create(user);
-                        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                        SecurityContextHolder.getContext().setAuthentication(authentication);
-                    }
-                }
-            } else {
-                throw ServiceException.getInstance("user-unauthorized", HttpStatus.UNAUTHORIZED);
-            }
-        } catch (Exception ex) {
-
+        /*// Get jwt token and validate
+        final String token = header.split(" ")[1].trim();
+        if (!tokenProvider.validateToken(token)) {
             throw ServiceException.getInstance("user-unauthorized", HttpStatus.UNAUTHORIZED);
+        }*/
+
+        String token=tokenProvider.getJwtTokenFromRequest(request);
+        Integer userId = tokenProvider.getUserIdFromJWT(token);
+        User user = customUserDetailsService.loadUserById(userId);
+        UserDetails userDetails = customUserDetailsService.loadUserDetailsById(userId);
+
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        String url = request.getParameter("url");
+        String method = request.getParameter("method");
+
+        Optional<Api> api = apiRepository.findApiByUrlAndMethod(url, HttpMethods.valueOf(method));
+        if (!api.isPresent()) {
+            authorizationException(response, "not_found_url", HttpStatus.NOT_FOUND);
+            chain.doFilter(request, response);
+            return;
+        }
+
+        if (!api.get().getPublicAccess()) {
+            if (!checkCurrentUserHavePermission(user, api.get().getId())) {
+                authorizationException(response, "unauthorized_api", HttpStatus.UNAUTHORIZED);
+                chain.doFilter(request, response);
+                return;
+            }
         }
         chain.doFilter(request, response);
     }
@@ -125,7 +107,7 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         out.flush();
     }
 
-    private Boolean checkCurrentUserHavePermission(User user,Integer apiId) {
+    private Boolean checkCurrentUserHavePermission(User user, Integer apiId) {
         return true;
     }
 

@@ -8,6 +8,7 @@ import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import javax.validation.constraints.Size;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -37,10 +38,12 @@ public class Api extends BaseEntity<Integer> {
     @Builder.Default
     private Boolean active = true;
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "api")
-    private Set<TemplatePermission> templatePermissions;
+    private List<TemplatePermission> templatePermissions;
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "api")
-    private Set<RolePermission> rolePermissions;
+    private List<RolePermission> rolePermissions;
 
 }

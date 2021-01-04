@@ -4,6 +4,7 @@ import com.salari.framework.uaa.model.entity.base.SimpleBaseEntity;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import javax.persistence.*;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -18,9 +19,11 @@ public class Template extends SimpleBaseEntity<Integer> {
     @Column(length = 50,nullable = false,unique = true)
     private String title;
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "template")
-    private Set<RoleTemplate> roleTemplates;
+    private List<RoleTemplate> roleTemplates;
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "template")
-    private Set<TemplatePermission> templatePermissions;
+    private List<TemplatePermission> templatePermissions;
 }

@@ -1,4 +1,5 @@
 package com.salari.framework.uaa.model.entity.base;
+import lombok.Builder;
 import lombok.experimental.SuperBuilder;
 import javax.persistence.MappedSuperclass;
 
@@ -6,6 +7,7 @@ import javax.persistence.MappedSuperclass;
 @MappedSuperclass
 public abstract class BaseEntity<T extends Number> extends SimpleBaseEntity<T> {
 
+    @Builder.Default
     protected Boolean deleted=false;
     protected Long creationDate=System.currentTimeMillis();
     protected Long deletionDate;

@@ -4,6 +4,7 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.Where;
 import javax.persistence.*;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -19,7 +20,7 @@ public class User extends BaseEntity<Integer> {
     @Column(length = 20,nullable = false,unique = true)
     private String username;
 
-    @Column(length = 50,nullable = false)
+    @Column(length = 100,nullable = false)
     private String password;
 
     @Column(nullable = false)
@@ -29,7 +30,7 @@ public class User extends BaseEntity<Integer> {
     private Integer personId;
 
     @OneToOne(cascade=CascadeType.ALL)
-    @JoinColumn(name="person_id",referencedColumnName = "id")
+    @JoinColumn(name="person_id",referencedColumnName = "id", insertable = false, updatable = false)
     private Person person;
 
     @Column(nullable = true)
@@ -41,7 +42,8 @@ public class User extends BaseEntity<Integer> {
     @Column(nullable = false)
     private Short loginFailedTryCount=0;
 
+    @ToString.Exclude
     @ManyToMany
     @JoinTable(name="user_role",joinColumns = @JoinColumn(name="user_id"),inverseJoinColumns = @JoinColumn(name="role_id"))
-    private Set<Role> roles;
+    private List<Role> roles;
 }

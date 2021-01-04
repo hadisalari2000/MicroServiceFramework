@@ -5,10 +5,8 @@ import com.google.common.collect.Lists;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import springfox.documentation.builders.ApiInfoBuilder;
-import springfox.documentation.builders.ParameterBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.schema.ModelRef;
 import springfox.documentation.service.*;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spi.service.contexts.SecurityContext;
@@ -35,13 +33,7 @@ public class SwaggerConfiguration {
                 .useDefaultResponseMessages(false)
                 .securityContexts(Lists.newArrayList(securityContext()))
                 .securitySchemes(new ArrayList<>(Arrays.asList(new ApiKey("JWT", "Authorization", "header"))))
-                .genericModelSubstitutes(Optional.class)
-                .globalOperationParameters(Arrays.asList(new ParameterBuilder()
-                        .description("channel-key")
-                        .modelRef(new ModelRef("string"))
-                        .parameterType("header")
-                        .required(true)
-                        .build()));
+                .genericModelSubstitutes(Optional.class);
 
     }
 

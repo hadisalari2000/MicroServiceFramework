@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.salari.framework.uaa.model.entity.Role;
 import com.salari.framework.uaa.model.enums.TokenTypes;
 import lombok.*;
+
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -17,5 +19,5 @@ public class JwtUserDTO {
     private TokenTypes type;
     private String jti;
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-    private Set<Role> roles;
+    private List<Role> roles;
 }

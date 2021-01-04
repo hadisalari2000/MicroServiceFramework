@@ -31,7 +31,7 @@ public class UserPrincipal implements UserDetails {
     @Synchronized
     static UserPrincipal create(User user) {
 
-        Set<Role> userRoles = user.getRoles();
+        List<Role> userRoles = user.getRoles();
         List<UserPrincipalRole> userPrincipalRoles=new ArrayList<>();
         List<GrantedAuthority> authorityList=new ArrayList<>();
 
