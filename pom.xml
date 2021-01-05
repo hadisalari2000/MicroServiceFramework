@@ -87,6 +87,12 @@
             <scope>provided</scope>
         </dependency>
 
+        <!--Convert Datetime to Json With @JsonFormat-->
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+        </dependency>
+
     </dependencies>
 
 </project>

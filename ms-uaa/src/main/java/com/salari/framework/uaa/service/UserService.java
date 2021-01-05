@@ -1,6 +1,7 @@
 package com.salari.framework.uaa.service;
 
-import com.salari.framework.uaa.handler.exception.ServiceException;
+import com.salari.framework.uaa.handler.exception.EntityGlobalException;
+import com.salari.framework.uaa.handler.exception.EntityNotFoundException;
 import com.salari.framework.uaa.model.domain.user.*;
 import com.salari.framework.uaa.model.dto.base.BaseDTO;
 import com.salari.framework.uaa.model.dto.base.MetaDTO;
@@ -69,10 +70,10 @@ public class UserService {
 
         User user = getExistUser(request.getUsername());
 
-        if (!user.getActive()) throw ServiceException.getInstance("disabled_user", HttpStatus.UNAUTHORIZED);
+        if (!user.getActive()) throw EntityGlobalException.getInstance("disabled_user",request.getUsername());
 
         if (user.getLastLoginTryDate() != null && user.getLoginFailedTryCount() > loginMaxTryCount && user.getLastLoginTryDate() + loginLockTime * 3600000L > System.currentTimeMillis())
-            throw ServiceException.getInstance("locked_credentials", HttpStatus.LOCKED);
+            throw EntityGlobalException.getInstance("locked_credentials", request.getUsername());
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             if (user.getLastLoginTryDate() != null && user.getLastLoginTryDate() + loginLockTime * 3600000L <= System.currentTimeMillis())
@@ -80,7 +81,7 @@ public class UserService {
             else user.setLoginFailedTryCount((short) (user.getLoginFailedTryCount() + 1));
             user.setLastLoginTryDate(System.currentTimeMillis());
             userRepository.save(user);
-            throw ServiceException.getInstance("invalid_credentials", HttpStatus.UNAUTHORIZED);
+            throw EntityGlobalException.getInstance("invalid_credentials");
         } else {
             user.setLoginFailedTryCount((short) 0);
             user.setLastLoginTryDate(null);
@@ -120,7 +121,7 @@ public class UserService {
         Optional<Person> existPerson = personRepository.findByNationalCode(request.getNationalCode());
 
         if (existPerson.isPresent() && userRepository.existsByPersonId(existPerson.get().getId()))
-            throw ServiceException.getInstance("duplicate_user", HttpStatus.CONFLICT);
+            throw EntityGlobalException.getDuplicateErrorInstance(User.class,"national-code", request.getNationalCode());
 
         Person person = existPerson.orElse(Person.builder().build());
         LoginDTO loginDTO = createUserAndLoginIt(person, request.getNationalCode(), request.getMobileNumber(), request.getBirthDate());
@@ -140,8 +141,7 @@ public class UserService {
         person.setCreationDate(System.currentTimeMillis());
         person = personRepository.save(person);
 
-        Role newUserRole = roleRepository.findByKey("public")
-                .orElseThrow(() -> ServiceException.getInstance("role-global-not-defined", HttpStatus.NOT_FOUND));
+        Role newUserRole = roleRepository.findByKey("public").orElseThrow(() -> EntityNotFoundException.getInstance(Role.class,"key", "public"));
 
         User user = User.builder()
                 .active(true)
@@ -166,7 +166,7 @@ public class UserService {
         Optional<Person> person = personRepository.findByNationalCode(request.getNationalCode());
 
         if (person.isPresent() && userRepository.existsByPersonId(person.get().getId()))
-            throw ServiceException.getInstance("duplicate_user", HttpStatus.CONFLICT);
+            throw EntityGlobalException.getDuplicateErrorInstance(User.class,"national-code",request.getNationalCode());
 
         UserVerificationDTO userVerificationDTO = generateVerificationCode(request.getNationalCode(), request.getMobileNumber(), request.getBirthDate());
 
@@ -182,7 +182,7 @@ public class UserService {
         Person person = personRepository.findByNationalCode(userVerification.getNationalCode()).orElse(Person.builder().build());
 
         if (userRepository.existsByPersonId(person.getId()))
-            throw ServiceException.getInstance("duplicate_user", HttpStatus.CONFLICT);
+            throw EntityGlobalException.getDuplicateErrorInstance(User.class,"national-code",userVerification.getNationalCode());
 
         LoginDTO loginDTO = createUserAndLoginIt(
                 person, userVerification.getNationalCode(), userVerification.getMobileNumber(), userVerification.getBirthDate());
@@ -236,7 +236,7 @@ public class UserService {
         passwordMatcher(request.getPassword(), request.getConfirmPassword());
 
         if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
-            throw ServiceException.getInstance("invalid_old_password", HttpStatus.NOT_ACCEPTABLE);
+            throw EntityGlobalException.getInstance("invalid_old_password");
         }
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         userRepository.save(user);
@@ -284,7 +284,7 @@ public class UserService {
     public BaseDTO changeRole(Integer roleId) {
         User currentUser = getCurrentUser();
         if (getUserRoles(currentUser.getId()).stream().noneMatch(role -> role.getId().equals(roleId)))
-            throw ServiceException.getInstance("invalid_role", HttpStatus.FORBIDDEN);
+            throw EntityGlobalException.getInstance("invalid_role");
 
         currentUser.setCurrentRoleId(roleId);
         userRepository.save(currentUser);
@@ -311,7 +311,7 @@ public class UserService {
     public BaseDTO changeUserStatus(UserChangeActivationRequest request) {
 
         User user = userRepository.findById(request.getId())
-                .orElseThrow(() -> ServiceException.getInstance("user-not-found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> EntityNotFoundException.getInstance(User.class,"id",request.getId().toString()));
 
         user.setActive(request.getActive());
         userRepository.save(user);
@@ -363,17 +363,17 @@ public class UserService {
         if (userRoles.isPresent())
             return userRoles.get().stream().findFirst().get();
         else
-            throw ServiceException.getInstance("role-not-found", HttpStatus.NOT_FOUND);
+            throw EntityNotFoundException.getInstance(Role.class,"user-id",user.getId().toString());
     }
 
     private User getExistUser(Integer userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> ServiceException.getInstance("user-not-found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> EntityNotFoundException.getInstance(User.class, "user-id",userId.toString()));
     }
 
     private User getExistUser(String username) {
         return userRepository.findByUsernameIgnoreCase(username)
-                .orElseThrow(() -> ServiceException.getInstance("invalid_credentials", HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> EntityGlobalException.getInstance("invalid_credentials"));
     }
 
     private User getCurrentUser() {

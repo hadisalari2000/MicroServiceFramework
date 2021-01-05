@@ -1,3 +1,4 @@
+/*
 package com.salari.framework.uaa.handler.exception;
 import com.salari.framework.uaa.utility.ApplicationProperties;
 import lombok.*;
@@ -23,3 +24,4 @@ public class ServiceException extends RuntimeException {
                 .build();
     }
 }
+*/

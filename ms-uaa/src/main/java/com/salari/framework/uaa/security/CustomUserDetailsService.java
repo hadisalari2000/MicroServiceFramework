@@ -1,6 +1,5 @@
 package com.salari.framework.uaa.security;
 
-import com.salari.framework.uaa.handler.exception.ServiceException;
 import com.salari.framework.uaa.model.entity.User;
 import com.salari.framework.uaa.repository.UserRepository;
 import org.springframework.http.HttpStatus;

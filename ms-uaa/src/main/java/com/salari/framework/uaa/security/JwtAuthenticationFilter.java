@@ -1,7 +1,6 @@
 package com.salari.framework.uaa.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.salari.framework.uaa.handler.exception.ServiceException;
 import com.salari.framework.uaa.model.dto.base.BaseDTO;
 import com.salari.framework.uaa.model.dto.base.BaseDTOMapper;
 import com.salari.framework.uaa.model.dto.base.MetaDTO;

@@ -1,8 +1,5 @@
 package com.salari.framework.uaa.security;
-import com.salari.framework.uaa.handler.exception.ServiceException;
-import com.salari.framework.uaa.model.entity.User;
 import com.salari.framework.uaa.model.enums.TokenTypes;
-import com.salari.framework.uaa.utility.ApplicationProperties;
 import com.salari.framework.uaa.utility.ApplicationUtilities;
 import io.jsonwebtoken.*;
 import com.salari.framework.uaa.model.dto.user.JwtUserDTO;
@@ -12,12 +9,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.UUID;
 
 
