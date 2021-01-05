@@ -1,8 +1,10 @@
 package com.salari.framework.uaa.security;
+import com.salari.framework.uaa.handler.exception.GlobalException;
 import com.salari.framework.uaa.model.enums.TokenTypes;
 import com.salari.framework.uaa.utility.ApplicationUtilities;
 import io.jsonwebtoken.*;
 import com.salari.framework.uaa.model.dto.user.JwtUserDTO;
+import org.hibernate.service.spi.ServiceException;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -126,15 +128,15 @@ public class JwtTokenProvider {
     String getJwtTokenFromRequest(HttpServletRequest request) {
 
         if (request.getHeader("Authorization") == null)
-            throw ServiceException.getInstance("unauthenticated_expired", HttpStatus.UNAUTHORIZED);
+            throw GlobalException.getAuthorizeErrorInstance("unauthenticated_expired");
 
         String bearerToken = request.getHeader("Authorization");
         if (bearerToken.isEmpty() || !bearerToken.startsWith("Bearer "))
-            throw ServiceException.getInstance("unauthenticated_token", HttpStatus.UNAUTHORIZED);
+            throw GlobalException.getAuthorizeErrorInstance("unauthenticated_token");
 
         String jwt = bearerToken.substring(7);
         if (!validateToken(jwt)) {
-            throw ServiceException.getInstance("user-unauthorized", HttpStatus.UNAUTHORIZED);
+            throw GlobalException.getAuthorizeErrorInstance("unauthorized");
         }
         Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(jwt);
         return jwt;

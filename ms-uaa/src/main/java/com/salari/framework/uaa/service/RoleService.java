@@ -1,6 +1,5 @@
 package com.salari.framework.uaa.service;
-import com.salari.framework.uaa.handler.exception.EntityGlobalException;
-import com.salari.framework.uaa.handler.exception.EntityNotFoundException;
+import com.salari.framework.uaa.handler.exception.GlobalException;
 import com.salari.framework.uaa.model.domain.role.*;
 import com.salari.framework.uaa.model.dto.base.*;
 import com.salari.framework.uaa.model.entity.Role;
@@ -25,46 +24,34 @@ public class RoleService {
     }
 
     public BaseDTO get(Integer id){
-        Role role=getExistRole(id);
-        return BaseDTO.builder()
-                .meta(MetaDTO.getInstance())
-                .data(roleMapper.ROLE_DTO(role))
-                .build();
+        Role role= getRole(id);
+        return BaseDTO.builder().data(roleMapper.ROLE_DTO(role)).build();
     }
 
     public BaseDTO getByKey(String key){
-        Role role=roleRepository.findByKey(key)
-                .orElseThrow(()->new EntityNotFoundException(Role.class,"key",key));
-        return BaseDTO.builder()
-                .meta(MetaDTO.getInstance())
-                .data(roleMapper.ROLE_DTO(role))
-                .build();
+        Role role=roleRepository.findByKey(key).orElseThrow(()->
+                GlobalException.getNotFoundErrorInstance(Role.class,"key",key));
+        return BaseDTO.builder().data(roleMapper.ROLE_DTO(role)).build();
     }
 
     public BaseDTO getAllByActivation(Boolean active){
 
-        List<Role> roles=roleRepository.findAllByActive(active)
-                .orElseThrow(()->new EntityNotFoundException(Role.class,"active",active.toString()));
+        List<Role> roles=roleRepository.findAllByActive(active).orElseThrow(()->
+                GlobalException.getNotFoundErrorInstance(Role.class,"active",active.toString()));
 
-        return BaseDTO.builder()
-                .meta(MetaDTO.getInstance())
-                .data(roles.stream().map(roleMapper::ROLE_DTO))
-                .build();
+        return BaseDTO.builder().data(roles.stream().map(roleMapper::ROLE_DTO)).build();
     }
 
     public BaseDTO getUserRoles(Integer userId){
-        List<Role> roles=roleRepository.findAllByUsers_Id(userId)
-                .orElseThrow(()->new EntityNotFoundException(Role.class,"user-id",userId.toString()));
+        List<Role> roles=roleRepository.findAllByUsers_Id(userId).orElseThrow(()->
+                GlobalException.getNotFoundErrorInstance(Role.class,"user-id",userId.toString()));
 
-        return BaseDTO.builder()
-                .meta(MetaDTO.getInstance())
-                .data(roles.stream().map(roleMapper::ROLE_DTO))
-                .build();
+        return BaseDTO.builder().data(roles.stream().map(roleMapper::ROLE_DTO)).build();
     }
 
     public Role getLastUserRole(User user) {
-        List<Role> userRoles =roleRepository.findAllByUsers_Id(user.getId())
-                .orElseThrow(()->new EntityNotFoundException(Role.class,"user-id",user.getId().toString()));
+        List<Role> userRoles =roleRepository.findAllByUsers_Id(user.getId()).orElseThrow(()->
+                GlobalException.getNotFoundErrorInstance(Role.class,"user-id",user.getId().toString()));
 
         Role lastUserRole=null;
          if(userRoles.stream().findFirst().isPresent())
@@ -77,13 +64,10 @@ public class RoleService {
     }
 
     public BaseDTO getAllByRoleType(RoleTypes roleType){
-        List<Role> roles=roleRepository.findAllByRoleType(roleType)
-                .orElseThrow(()->new EntityNotFoundException(Role.class,"role_type",roleType.toString()));
+        List<Role> roles=roleRepository.findAllByRoleType(roleType).orElseThrow(()->
+                GlobalException.getNotFoundErrorInstance(Role.class,"role-type",roleType.toString()));
 
-        return BaseDTO.builder()
-                .meta(MetaDTO.getInstance())
-                .data(roles.stream().map(roleMapper::ROLE_DTO))
-                .build();
+        return BaseDTO.builder().data(roles.stream().map(roleMapper::ROLE_DTO)).build();
     }
 
     public BaseDTO add(RoleAddRequest request){
@@ -98,49 +82,36 @@ public class RoleService {
 
         roleRepository.save(role);
 
-        return BaseDTO.builder()
-                .meta(MetaDTO.getInstance())
-                .data(roleMapper.ROLE_DTO(role))
-                .build();
+        return BaseDTO.builder().data(roleMapper.ROLE_DTO(role)).build();
     }
 
     public BaseDTO edit(RoleEditRequest request){
-        Role role=getExistRole(request.getId());
+        Role role= getRole(request.getId());
         checkDuplicateRole(request.getTitle(),request.getKey(),role);
         role.setDescription(request.getDescription());
         role.setKey(request.getKey());
         role.setRoleType(request.getRoleType());
         role.setTitle(request.getTitle());
         roleRepository.save(role);
-        return BaseDTO.builder()
-                .meta(MetaDTO.getInstance())
-                .data(roleMapper.ROLE_DTO(role))
-                .build();
+        return BaseDTO.builder().data(roleMapper.ROLE_DTO(role)).build();
     }
 
     public BaseDTO delete(Integer id){
-        Role role=getExistRole(id);
+        Role role= getRole(id);
         roleRepository.delete(role);
-        return BaseDTO.builder()
-                .meta(MetaDTO.getInstance())
-                .data(null)
-                .build();
+        return BaseDTO.builder().data(null).build();
     }
     
     public BaseDTO changeActivation(RoleChangeActivationRequest request){
-        Role role=getExistRole(request.getId());
+        Role role= getRole(request.getId());
         role.setActive(request.getActive());
         roleRepository.save(role);
-
-        return BaseDTO.builder()
-                .meta(MetaDTO.getInstance())
-                .data(roleMapper.ROLE_DTO(role))
-                .build();
+        return BaseDTO.builder().data(roleMapper.ROLE_DTO(role)).build();
     }
 
-    private Role getExistRole(Integer roleId){
-        return roleRepository.findById(roleId)
-                .orElseThrow(()-> EntityNotFoundException.getInstance(Role.class,"id",roleId.toString()));
+    private Role getRole(Integer roleId){
+        return roleRepository.findById(roleId).orElseThrow(()->
+                GlobalException.getNotFoundErrorInstance(Role.class,"id",roleId.toString()));
     }
 
     private void checkDuplicateRole(String title,String key,Role role){
@@ -148,9 +119,9 @@ public class RoleService {
         Optional<Role> roleExist=roleRepository.findByTitleOrKey(title,key);
 
         if(roleExist.isPresent() && !(role!=null && roleExist.get().getId().equals(role.getId())) && roleExist.get().getKey().equalsIgnoreCase(key))
-            throw EntityGlobalException.getDuplicateErrorInstance(Role.class, "key",key);
+            throw GlobalException.getDuplicateErrorInstance(Role.class, "key",key);
 
         if(roleExist.isPresent() && !(role!=null && roleExist.get().getId().equals(role.getId())) && roleExist.get().getTitle().equalsIgnoreCase(title))
-            throw EntityGlobalException.getDuplicateErrorInstance(Role.class, "title",title);
+            throw GlobalException.getDuplicateErrorInstance(Role.class, "title",title);
     }
 }

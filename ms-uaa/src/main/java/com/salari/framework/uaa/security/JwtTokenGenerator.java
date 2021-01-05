@@ -41,23 +41,4 @@ public class JwtTokenGenerator {
                 .compact();
     }
 
-    //public static void main(String[] args) {
-
-//        JwtUserDTO user = new JwtUserDTO();
-//        user.setRoles("admin");
-//        user.setExpiration(new Date().getTime());
-//        user.setJti(UUID.randomUUID().toString());
-//        user.setType(ApplicationProperties.getInstance().getProperty("jwt.type"));
-//
-//        String jwt_token = generateToken(user, ApplicationProperties.getInstance().getProperty("secret"));
-//        System.out.println("**************************************\n\n" + jwt_token + "\n\n**************************************");
-//
-//        JwtTokenValidator jwtTokenValidator = new JwtTokenValidator();
-//
-//        user = jwtTokenValidator.parseToken(jwt_token);
-//        System.out.println(user.getRole());
-//        System.out.println(user.getUserId());
-//        System.out.println(user.getType());
-//        System.out.println(user.getJti());
-    //}
 }

@@ -112,8 +112,8 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
      * @param ex the EntityNotFoundException
      * @return the ApiError object
      */
-    @ExceptionHandler(EntityNotFoundException.class)
-    protected ResponseEntity<Object> handleEntityNotFound( EntityNotFoundException ex) {
+    @ExceptionHandler(GlobalException.class)
+    protected ResponseEntity<Object> handleEntityNotFound( GlobalException ex) {
         ApiError apiError = new ApiError(NOT_FOUND);
         apiError.setMessage(ex.getMessage());
         return buildResponseEntity(apiError);
@@ -125,8 +125,8 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
      * @param ex the EntityNotFoundException
      * @return the ApiError object
      */
-    @ExceptionHandler(EntityGlobalException.class)
-    protected ResponseEntity<Object> handleEntityDuplicated( EntityGlobalException ex) {
+    @ExceptionHandler(GlobalException.class)
+    protected ResponseEntity<Object> handleEntityDuplicated( GlobalException ex) {
         ApiError apiError = new ApiError(BAD_REQUEST);
         apiError.setMessage(ex.getMessage());
         return buildResponseEntity(apiError);

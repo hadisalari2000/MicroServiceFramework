@@ -1,10 +1,8 @@
 package com.salari.framework.uaa.service;
 
-import com.salari.framework.uaa.handler.exception.EntityGlobalException;
-import com.salari.framework.uaa.handler.exception.EntityNotFoundException;
+import com.salari.framework.uaa.handler.exception.GlobalException;
 import com.salari.framework.uaa.model.domain.user.*;
 import com.salari.framework.uaa.model.dto.base.BaseDTO;
-import com.salari.framework.uaa.model.dto.base.MetaDTO;
 import com.salari.framework.uaa.model.dto.base.PagerDTO;
 import com.salari.framework.uaa.model.dto.user.JwtUserDTO;
 import com.salari.framework.uaa.model.dto.user.LoginDTO;
@@ -18,6 +16,7 @@ import com.salari.framework.uaa.model.mapper.UserVerificationMapper;
 import com.salari.framework.uaa.repository.*;
 import com.salari.framework.uaa.security.JwtTokenProvider;
 import com.salari.framework.uaa.utility.PageableUtility;
+import org.hibernate.service.spi.ServiceException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -70,10 +69,11 @@ public class UserService {
 
         User user = getExistUser(request.getUsername());
 
-        if (!user.getActive()) throw EntityGlobalException.getInstance("disabled_user",request.getUsername());
+        if (!user.getActive())
+            throw GlobalException.getInstance("disabled_user",request.getUsername());
 
         if (user.getLastLoginTryDate() != null && user.getLoginFailedTryCount() > loginMaxTryCount && user.getLastLoginTryDate() + loginLockTime * 3600000L > System.currentTimeMillis())
-            throw EntityGlobalException.getInstance("locked_credentials", request.getUsername());
+            throw GlobalException.getInstance("locked_credentials", request.getUsername());
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             if (user.getLastLoginTryDate() != null && user.getLastLoginTryDate() + loginLockTime * 3600000L <= System.currentTimeMillis())
@@ -81,7 +81,7 @@ public class UserService {
             else user.setLoginFailedTryCount((short) (user.getLoginFailedTryCount() + 1));
             user.setLastLoginTryDate(System.currentTimeMillis());
             userRepository.save(user);
-            throw EntityGlobalException.getInstance("invalid_credentials");
+            throw GlobalException.getInstance("invalid_credentials");
         } else {
             user.setLoginFailedTryCount((short) 0);
             user.setLastLoginTryDate(null);
@@ -97,10 +97,7 @@ public class UserService {
                 .refreshToken(tokenProvider.generateJwtToken(user.getId(), userLastRole.getId(), TokenTypes.REFRESH))
                 .build();
 
-        return BaseDTO.builder()
-                .meta(MetaDTO.getInstance())
-                .data(loginDTO)
-                .build();
+        return BaseDTO.builder().data(loginDTO).build();
     }
 
     public BaseDTO refreshToken() {
@@ -110,10 +107,7 @@ public class UserService {
                 .accessToken(tokenProvider.generateJwtToken(currentUser.getId(), currentRole.getId(), TokenTypes.TOKEN))
                 .refreshToken(tokenProvider.generateJwtToken(currentUser.getId(), currentRole.getId(), TokenTypes.REFRESH))
                 .build();
-        return BaseDTO.builder()
-                .meta(MetaDTO.getInstance())
-                .data(loginDTO)
-                .build();
+        return BaseDTO.builder().data(loginDTO).build();
     }
 
     public BaseDTO registerUser(UserRegisterRequest request) {
@@ -121,15 +115,12 @@ public class UserService {
         Optional<Person> existPerson = personRepository.findByNationalCode(request.getNationalCode());
 
         if (existPerson.isPresent() && userRepository.existsByPersonId(existPerson.get().getId()))
-            throw EntityGlobalException.getDuplicateErrorInstance(User.class,"national-code", request.getNationalCode());
+            throw GlobalException.getDuplicateErrorInstance(User.class,"national-code", request.getNationalCode());
 
         Person person = existPerson.orElse(Person.builder().build());
         LoginDTO loginDTO = createUserAndLoginIt(person, request.getNationalCode(), request.getMobileNumber(), request.getBirthDate());
 
-        return BaseDTO.builder()
-                .meta(MetaDTO.getInstance())
-                .data(loginDTO)
-                .build();
+        return BaseDTO.builder().data(loginDTO).build();
     }
 
     @Transactional
@@ -141,7 +132,8 @@ public class UserService {
         person.setCreationDate(System.currentTimeMillis());
         person = personRepository.save(person);
 
-        Role newUserRole = roleRepository.findByKey("public").orElseThrow(() -> EntityNotFoundException.getInstance(Role.class,"key", "public"));
+        Role newUserRole = roleRepository.findByKey("public").orElseThrow(() ->
+                GlobalException.getNotFoundErrorInstance(Role.class,"key", "public"));
 
         User user = User.builder()
                 .active(true)
@@ -166,14 +158,11 @@ public class UserService {
         Optional<Person> person = personRepository.findByNationalCode(request.getNationalCode());
 
         if (person.isPresent() && userRepository.existsByPersonId(person.get().getId()))
-            throw EntityGlobalException.getDuplicateErrorInstance(User.class,"national-code",request.getNationalCode());
+            throw GlobalException.getDuplicateErrorInstance(User.class,"national-code",request.getNationalCode());
 
         UserVerificationDTO userVerificationDTO = generateVerificationCode(request.getNationalCode(), request.getMobileNumber(), request.getBirthDate());
 
-        return BaseDTO.builder()
-                .meta(MetaDTO.getInstance())
-                .data(userVerificationDTO)
-                .build();
+        return BaseDTO.builder().data(userVerificationDTO).build();
     }
 
     public BaseDTO userVerification(UserVerificationRequest request) {
@@ -182,27 +171,21 @@ public class UserService {
         Person person = personRepository.findByNationalCode(userVerification.getNationalCode()).orElse(Person.builder().build());
 
         if (userRepository.existsByPersonId(person.getId()))
-            throw EntityGlobalException.getDuplicateErrorInstance(User.class,"national-code",userVerification.getNationalCode());
+            throw GlobalException.getDuplicateErrorInstance(User.class,"national-code",userVerification.getNationalCode());
 
         LoginDTO loginDTO = createUserAndLoginIt(
                 person, userVerification.getNationalCode(), userVerification.getMobileNumber(), userVerification.getBirthDate());
 
         userVerificationRepository.deleteById(userVerification.getId());
 
-        return BaseDTO.builder()
-                .meta(MetaDTO.getInstance())
-                .data(loginDTO)
-                .build();
+        return BaseDTO.builder().data(loginDTO).build();
     }
 
     public BaseDTO forgetPassword(PasswordForgetRequest request) {
         User user = getUserByNationalCode(request.getNationalCode());
         Person person = user.getPerson();
         UserVerificationDTO userVerificationDTO = generateVerificationCode(person.getNationalCode(), person.getMobileNumber(), person.getBirthDate());
-        return BaseDTO.builder()
-                .meta(MetaDTO.getInstance())
-                .data(userVerificationDTO)
-                .build();
+        return BaseDTO.builder().data(userVerificationDTO).build();
     }
 
     public BaseDTO forgetPasswordVerification(UserVerificationRequest request) {
@@ -212,10 +195,7 @@ public class UserService {
                 .accessToken(tokenProvider.generateJwtToken(user.getId(), user.getCurrentRoleId(), TokenTypes.TOKEN))
                 .build();
         userVerificationRepository.deleteById(userVerification.getId());
-        return BaseDTO.builder()
-                .meta(MetaDTO.getInstance())
-                .data(loginDTO)
-                .build();
+        return BaseDTO.builder().data(loginDTO).build();
     }
 
     public BaseDTO resetPassword(PasswordResetRequest request) {
@@ -223,11 +203,7 @@ public class UserService {
         passwordMatcher(request.getPassword(), request.getConfirmPassword());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         userRepository.save(user);
-
-        return BaseDTO.builder()
-                .meta(MetaDTO.getInstance())
-                .data(userMapper.USER_DTO(user))
-                .build();
+        return BaseDTO.builder().data(userMapper.USER_DTO(user)).build();
     }
 
     public BaseDTO changePassword(PasswordChangeRequest request) {
@@ -236,21 +212,15 @@ public class UserService {
         passwordMatcher(request.getPassword(), request.getConfirmPassword());
 
         if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
-            throw EntityGlobalException.getInstance("invalid_old_password");
+            throw GlobalException.getInstance("invalid_old_password");
         }
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         userRepository.save(user);
-        return BaseDTO.builder()
-                .meta(MetaDTO.getInstance())
-                .data(null)
-                .build();
+        return BaseDTO.builder().data(null).build();
     }
 
     public BaseDTO getUserProfile() {
-        return BaseDTO.builder()
-                .meta(MetaDTO.getInstance())
-                .data(personMapper.PERSON_DTO(getCurrentUser().getPerson()))
-                .build();
+        return BaseDTO.builder().data(personMapper.PERSON_DTO(getCurrentUser().getPerson())).build();
     }
 
     public BaseDTO editUserProfile(UserEditProfileRequest request) {
@@ -263,10 +233,7 @@ public class UserService {
         person.setEmail(request.getEmail());
         person = personRepository.save(person);
 
-        return BaseDTO.builder()
-                .meta(MetaDTO.getInstance())
-                .data(personMapper.PERSON_DTO(person))
-                .build();
+        return BaseDTO.builder().data(personMapper.PERSON_DTO(person)).build();
     }
 
     public BaseDTO changeMobileNumber(UserEditMobileNumberRequest request) {
@@ -275,16 +242,13 @@ public class UserService {
         userRepository.save(user);
         UserDTO userDTO = userMapper.USER_DTO(user);
         userDTO.setPerson(personMapper.PERSON_DTO(user.getPerson()));
-        return BaseDTO.builder()
-                .meta(MetaDTO.getInstance())
-                .data(userDTO)
-                .build();
+        return BaseDTO.builder().data(userDTO).build();
     }
 
     public BaseDTO changeRole(Integer roleId) {
         User currentUser = getCurrentUser();
         if (getUserRoles(currentUser.getId()).stream().noneMatch(role -> role.getId().equals(roleId)))
-            throw EntityGlobalException.getInstance("invalid_role");
+            throw GlobalException.getInstance("invalid_role");
 
         currentUser.setCurrentRoleId(roleId);
         userRepository.save(currentUser);
@@ -294,32 +258,23 @@ public class UserService {
                 .refreshToken(tokenProvider.generateJwtToken(currentUser.getId(), roleId, TokenTypes.REFRESH))
                 .build();
 
-        return BaseDTO.builder()
-                .meta(MetaDTO.getInstance())
-                .data(loginDTO)
-                .build();
+        return BaseDTO.builder().data(loginDTO).build();
     }
 
     public BaseDTO getUserById(Integer id) {
         User user = getExistUser(id);
-        return BaseDTO.builder()
-                .meta(MetaDTO.getInstance())
-                .data(userMapper.USER_DTO(user))
-                .build();
+        return BaseDTO.builder().data(userMapper.USER_DTO(user)).build();
     }
 
     public BaseDTO changeUserStatus(UserChangeActivationRequest request) {
 
-        User user = userRepository.findById(request.getId())
-                .orElseThrow(() -> EntityNotFoundException.getInstance(User.class,"id",request.getId().toString()));
+        User user = userRepository.findById(request.getId()).orElseThrow(() ->
+                GlobalException.getNotFoundErrorInstance(User.class,"id",request.getId().toString()));
 
         user.setActive(request.getActive());
         userRepository.save(user);
 
-        return BaseDTO.builder()
-                .meta(MetaDTO.getInstance())
-                .data(userMapper.USER_DTO(user))
-                .build();
+        return BaseDTO.builder().data(userMapper.USER_DTO(user)).build();
     }
 
     public BaseDTO deleteUser(Integer id) {
@@ -333,18 +288,13 @@ public class UserService {
         user.setRoles(null);
         userRepository.save(user);
 
-        return BaseDTO.builder()
-                .meta(MetaDTO.getInstance())
-                .build();
+        return BaseDTO.builder().data(null).build();
     }
 
     public BaseDTO getUsersByFilter(UserFilterRequest request,Integer page) {
         Page<User> users = userRepository.findUsersByFilters(request, pageableUtility.createPageable(page));
         PagerDTO<UserDTO> pagerDTO = new PagerDTO<>(users.map(userMapper::USER_DTO));
-        return BaseDTO.builder()
-                .meta(MetaDTO.getInstance())
-                .data(pagerDTO)
-                .build();
+        return BaseDTO.builder().data(pagerDTO).build();
     }
 
     public List<Api> getPermissionsByRoleId(Integer roleId) {
@@ -363,17 +313,17 @@ public class UserService {
         if (userRoles.isPresent())
             return userRoles.get().stream().findFirst().get();
         else
-            throw EntityNotFoundException.getInstance(Role.class,"user-id",user.getId().toString());
+            throw GlobalException.getNotFoundErrorInstance(Role.class,"user-id",user.getId().toString());
     }
 
     private User getExistUser(Integer userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> EntityNotFoundException.getInstance(User.class, "user-id",userId.toString()));
+        return userRepository.findById(userId).orElseThrow(() ->
+                GlobalException.getNotFoundErrorInstance(User.class, "user-id",userId.toString()));
     }
 
     private User getExistUser(String username) {
         return userRepository.findByUsernameIgnoreCase(username)
-                .orElseThrow(() -> EntityGlobalException.getInstance("invalid_credentials"));
+                .orElseThrow(() -> GlobalException.getInstance("invalid_credentials"));
     }
 
     private User getCurrentUser() {
@@ -383,19 +333,20 @@ public class UserService {
     private User getCurrentUser(TokenTypes tokenTypes) {
         JwtUserDTO userToken = tokenProvider.parseToken();
         if (tokenTypes != null && !userToken.getType().equals(tokenTypes))
-            throw ServiceException.getInstance("unauthenticated_token", HttpStatus.UNAUTHORIZED);
+            throw GlobalException.getAuthorizeErrorInstance("unauthenticated_token");
         Integer userId = userToken.getId();
-        return userRepository.findById(userId)
-                .orElseThrow(() -> ServiceException.getInstance("unauthenticated_user", HttpStatus.UNAUTHORIZED));
+        return userRepository.findById(userId).orElseThrow(() ->
+                GlobalException.getForbiddenErrorInstance(User.class));
     }
 
     private Role getCurrentUserRole() {
         JwtUserDTO userToken = tokenProvider.parseToken();
         Integer roleId = userToken.getRoleId();
         Integer userId = userToken.getId();
-        Role roleItem = roleRepository.findById(roleId).orElseThrow(() -> ServiceException.getInstance("unauthenticated_role", HttpStatus.UNAUTHORIZED));
+        Role roleItem = roleRepository.findById(roleId).orElseThrow(() ->
+                GlobalException.getForbiddenErrorInstance(Role.class));
         if (getUserRoles(userId).stream().anyMatch(role -> role.getId().equals(roleId))) return roleItem;
-        else throw ServiceException.getInstance("unauthenticated_role", HttpStatus.UNAUTHORIZED);
+        else throw GlobalException.getForbiddenErrorInstance(Role.class);
     }
 
     private List<Role> getUserRoles(Integer userId) {
@@ -424,19 +375,19 @@ public class UserService {
     private UserVerification getUserVerificationExists(UUID key, String code) {
         return userVerificationRepository
                 .findByKeyAndCodeAndExpirationDateGreaterThan(key, code, System.currentTimeMillis())
-                .orElseThrow(() -> ServiceException.getInstance("not_found_user_verification_code", HttpStatus.BAD_REQUEST));
+                .orElseThrow(() -> GlobalException.getInstance("not_found_user_verification_code"));
     }
 
     private User getUserByNationalCode(String nationalCode) {
-        Person person = personRepository.findByNationalCode(nationalCode)
-                .orElseThrow(() -> ServiceException.getInstance("person-not-found", HttpStatus.NOT_FOUND));
-        return userRepository.findByPersonId(person.getId())
-                .orElseThrow(() -> ServiceException.getInstance("user-not-found", HttpStatus.NOT_FOUND));
+        Person person = personRepository.findByNationalCode(nationalCode).orElseThrow(() ->
+                GlobalException.getNotFoundErrorInstance(Person.class,"national-code",nationalCode));
+        return userRepository.findByPersonId(person.getId()).orElseThrow(() ->
+                GlobalException.getNotFoundErrorInstance(Person.class,"id", person.getId().toString()));
     }
 
     private void passwordMatcher(String password, String confirmPassword) {
         if (!password.equals(confirmPassword)) {
-            throw ServiceException.getInstance("not_match_password", HttpStatus.NOT_ACCEPTABLE);
+            throw GlobalException.getInstance("not_match_password");
         }
     }
 }

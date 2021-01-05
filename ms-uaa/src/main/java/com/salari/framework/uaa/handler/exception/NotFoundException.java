@@ -1,25 +1,28 @@
+/*
 package com.salari.framework.uaa.handler.exception;
 
+import com.salari.framework.uaa.utility.ApplicationProperties;
 import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.IntStream;
 
-public class EntityNotFoundException extends RuntimeException{
+public class NotFoundException extends RuntimeException{
 
-    public EntityNotFoundException(){ }
+    public NotFoundException(){ }
 
-    private EntityNotFoundException(String message){super(message);}
+    private NotFoundException(String message){super(message);}
 
-    public static EntityNotFoundException getInstance(Class clazz, String... searchParamsMap) {
-        return new EntityNotFoundException(generateMessage(clazz.getSimpleName(), toMap(String.class, String.class, searchParamsMap)));
+    public static NotFoundException getInstance(Class clazz, String... searchParamsMap) {
+        return new NotFoundException(generateMessage(clazz.getSimpleName(), toMap(String.class, String.class, searchParamsMap)));
     }
 
     private static String generateMessage(String entity, Map<String, String> searchParams) {
-        return StringUtils.capitalize(entity) +
-                " was not found for parameters " +
-                searchParams;
+        return String.format(
+                ApplicationProperties.getProperty("not-found"),
+                ApplicationProperties.getProperty(entity.toLowerCase()),
+                searchParams);
     }
 
     private static <K, V> Map<K, V> toMap(
@@ -32,3 +35,4 @@ public class EntityNotFoundException extends RuntimeException{
                         Map::putAll);
     }
 }
+*/

@@ -1,10 +1,8 @@
 package com.salari.framework.uaa.service;
-import com.salari.framework.uaa.handler.exception.EntityGlobalException;
-import com.salari.framework.uaa.handler.exception.EntityNotFoundException;
+import com.salari.framework.uaa.handler.exception.GlobalException;
 import com.salari.framework.uaa.model.domain.person.PersonAddRequest;
 import com.salari.framework.uaa.model.domain.person.PersonEditRequest;
 import com.salari.framework.uaa.model.dto.base.BaseDTO;
-import com.salari.framework.uaa.model.dto.base.MetaDTO;
 import com.salari.framework.uaa.model.entity.Person;
 import com.salari.framework.uaa.model.mapper.PersonMapper;
 import com.salari.framework.uaa.repository.PersonRepository;
@@ -23,12 +21,9 @@ public class PersonService {
         this.personMapper = personMapper;
     }
 
-    public BaseDTO getPerson(Integer id){
-        Person person=getExistPerson(id);
-        return BaseDTO.builder()
-                .meta(MetaDTO.getInstance())
-                .data(personMapper.PERSON_DTO(person))
-                .build();
+    public BaseDTO get(Integer id){
+        Person person= getPerson(id);
+        return BaseDTO.builder().data(personMapper.PERSON_DTO(person)).build();
     }
 
     public BaseDTO addPerson(PersonAddRequest request){
@@ -43,14 +38,11 @@ public class PersonService {
                 .gender(request.getGender())
                 .build();
         personRepository.save(person);
-        return BaseDTO.builder()
-                .meta(MetaDTO.getInstance())
-                .data(personMapper.PERSON_DTO(person))
-                .build();
+        return BaseDTO.builder().data(personMapper.PERSON_DTO(person)).build();
     }
 
     public BaseDTO editPerson(PersonEditRequest request){
-        Person person=getExistPerson(request.getId());
+        Person person= getPerson(request.getId());
         checkDuplicatePerson(request.getNationalCode(),request.getMobileNumber(),person);
         person.setBirthDate(request.getBirthDate());
         person.setFatherName(request.getFatherName());
@@ -60,24 +52,18 @@ public class PersonService {
         person.setMobileNumber(request.getMobileNumber());
         person.setNationalCode(request.getNationalCode());
         personRepository.save(person);
-        return BaseDTO.builder()
-                .meta(MetaDTO.getInstance())
-                .data(personMapper.PERSON_DTO(person))
-                .build();
+        return BaseDTO.builder().data(personMapper.PERSON_DTO(person)).build();
     }
 
     public BaseDTO deletePerson(Integer id){
-        Person person=getExistPerson(id);
+        Person person= getPerson(id);
         personRepository.delete(person);
-        return BaseDTO.builder()
-                .meta(MetaDTO.getInstance())
-                .data(null)
-                .build();
+        return BaseDTO.builder().data(null).build();
     }
 
-    private Person getExistPerson(Integer personId){
-        return personRepository.findById(personId)
-                .orElseThrow(()-> EntityNotFoundException.getInstance(Person.class,"id",personId.toString()));
+    private Person getPerson(Integer personId){
+        return personRepository.findById(personId).orElseThrow(()->
+                GlobalException.getNotFoundErrorInstance(Person.class,"id",personId.toString()));
     }
 
     private void checkDuplicatePerson(String nationalCode,String mobileNumber,Person person){
@@ -85,10 +71,10 @@ public class PersonService {
         Optional<Person> existPerson=personRepository.findByNationalCodeOrMobileNumber(nationalCode,mobileNumber);
 
         if(existPerson.isPresent() && !(person!=null && existPerson.get().getId().equals(person.getId())) && existPerson.get().getNationalCode().equals(nationalCode))
-            throw  EntityGlobalException.getDuplicateErrorInstance(Person.class, "national-code",nationalCode);
+            throw  GlobalException.getDuplicateErrorInstance(Person.class, "national-code",nationalCode);
 
         if(existPerson.isPresent() && !(person!=null && existPerson.get().getId().equals(person.getId())) && existPerson.get().getMobileNumber().equals(mobileNumber))
-            throw EntityGlobalException.getDuplicateErrorInstance(Person.class, "mobile-number",mobileNumber);
+            throw GlobalException.getDuplicateErrorInstance(Person.class, "mobile-number",mobileNumber);
     }
 
 }
