@@ -2,7 +2,6 @@ package com.salari.framework.uaa.handler.exception;
 
 import com.salari.framework.uaa.utility.ApplicationProperties;
 import org.springframework.http.HttpStatus;
-import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,33 +9,26 @@ import java.util.stream.IntStream;
 
 import static org.springframework.http.HttpStatus.*;
 
-public class GlobalException extends RuntimeException{
+public class ForbiddenException extends RuntimeException{
 
     private String message;
     private HttpStatus status;
 
-    public GlobalException() {
+    public ForbiddenException() {
         super();
     }
 
-    private GlobalException(String message,HttpStatus status) {
+    private ForbiddenException(String message, HttpStatus status) {
         super(message);
         this.status=status;
     }
 
-    public static GlobalException getInstance(String key, String... args){
-        String message= String.format(ApplicationProperties.getProperty(key), (Object) args);
-        return new GlobalException(message,BAD_REQUEST);
-    }
-
-    public static GlobalException getDuplicateErrorInstance(Class clazz, String... paramsMap){
+    public static ForbiddenException getInstance(Class clazz){
         String entity=clazz.getSimpleName();
-        Map<String, String> searchParams=toMap(String.class, String.class, (Object) paramsMap);
         String message=String.format(
-                ApplicationProperties.getProperty("duplicated"),
-                ApplicationProperties.getProperty(entity.toLowerCase()),
-                searchParams);
-        return new GlobalException(message,BAD_REQUEST);
+                ApplicationProperties.getProperty("forbidden"),
+                ApplicationProperties.getProperty(entity.toLowerCase()));
+        return new ForbiddenException(message,FORBIDDEN);
     }
 
     private static <K, V> Map<K, V> toMap(Class<K> keyType, Class<V> valueType, Object... entries) {

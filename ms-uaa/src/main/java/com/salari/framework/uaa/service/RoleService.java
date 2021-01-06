@@ -1,5 +1,6 @@
 package com.salari.framework.uaa.service;
 import com.salari.framework.uaa.handler.exception.GlobalException;
+import com.salari.framework.uaa.handler.exception.NotFoundException;
 import com.salari.framework.uaa.model.domain.role.*;
 import com.salari.framework.uaa.model.dto.base.*;
 import com.salari.framework.uaa.model.entity.Role;
@@ -30,28 +31,28 @@ public class RoleService {
 
     public BaseDTO getByKey(String key){
         Role role=roleRepository.findByKey(key).orElseThrow(()->
-                GlobalException.getNotFoundErrorInstance(Role.class,"key",key));
+                NotFoundException.getInstance(Role.class,"key",key));
         return BaseDTO.builder().data(roleMapper.ROLE_DTO(role)).build();
     }
 
     public BaseDTO getAllByActivation(Boolean active){
 
         List<Role> roles=roleRepository.findAllByActive(active).orElseThrow(()->
-                GlobalException.getNotFoundErrorInstance(Role.class,"active",active.toString()));
+                NotFoundException.getInstance(Role.class,"active",active.toString()));
 
         return BaseDTO.builder().data(roles.stream().map(roleMapper::ROLE_DTO)).build();
     }
 
     public BaseDTO getUserRoles(Integer userId){
         List<Role> roles=roleRepository.findAllByUsers_Id(userId).orElseThrow(()->
-                GlobalException.getNotFoundErrorInstance(Role.class,"user-id",userId.toString()));
+                NotFoundException.getInstance(Role.class,"user-id",userId.toString()));
 
         return BaseDTO.builder().data(roles.stream().map(roleMapper::ROLE_DTO)).build();
     }
 
     public Role getLastUserRole(User user) {
         List<Role> userRoles =roleRepository.findAllByUsers_Id(user.getId()).orElseThrow(()->
-                GlobalException.getNotFoundErrorInstance(Role.class,"user-id",user.getId().toString()));
+                NotFoundException.getInstance(Role.class,"user-id",user.getId().toString()));
 
         Role lastUserRole=null;
          if(userRoles.stream().findFirst().isPresent())
@@ -65,7 +66,7 @@ public class RoleService {
 
     public BaseDTO getAllByRoleType(RoleTypes roleType){
         List<Role> roles=roleRepository.findAllByRoleType(roleType).orElseThrow(()->
-                GlobalException.getNotFoundErrorInstance(Role.class,"role-type",roleType.toString()));
+                NotFoundException.getInstance(Role.class,"role-type",roleType.toString()));
 
         return BaseDTO.builder().data(roles.stream().map(roleMapper::ROLE_DTO)).build();
     }
@@ -111,7 +112,7 @@ public class RoleService {
 
     private Role getRole(Integer roleId){
         return roleRepository.findById(roleId).orElseThrow(()->
-                GlobalException.getNotFoundErrorInstance(Role.class,"id",roleId.toString()));
+                NotFoundException.getInstance(Role.class,"id",roleId.toString()));
     }
 
     private void checkDuplicateRole(String title,String key,Role role){

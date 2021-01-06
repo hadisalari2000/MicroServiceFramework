@@ -1,16 +1,14 @@
 package com.salari.framework.uaa.security;
-import com.salari.framework.uaa.handler.exception.GlobalException;
+import com.salari.framework.uaa.handler.exception.AuthorizeException;
 import com.salari.framework.uaa.model.enums.TokenTypes;
 import com.salari.framework.uaa.utility.ApplicationUtilities;
 import io.jsonwebtoken.*;
 import com.salari.framework.uaa.model.dto.user.JwtUserDTO;
-import org.hibernate.service.spi.ServiceException;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
@@ -128,15 +126,15 @@ public class JwtTokenProvider {
     String getJwtTokenFromRequest(HttpServletRequest request) {
 
         if (request.getHeader("Authorization") == null)
-            throw GlobalException.getAuthorizeErrorInstance("unauthenticated_expired");
+            throw AuthorizeException.getInstance("unauthenticated_expired");
 
         String bearerToken = request.getHeader("Authorization");
         if (bearerToken.isEmpty() || !bearerToken.startsWith("Bearer "))
-            throw GlobalException.getAuthorizeErrorInstance("unauthenticated_token");
+            throw AuthorizeException.getInstance("unauthenticated_token");
 
         String jwt = bearerToken.substring(7);
         if (!validateToken(jwt)) {
-            throw GlobalException.getAuthorizeErrorInstance("unauthorized");
+            throw AuthorizeException.getInstance("unauthorized");
         }
         Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(jwt);
         return jwt;

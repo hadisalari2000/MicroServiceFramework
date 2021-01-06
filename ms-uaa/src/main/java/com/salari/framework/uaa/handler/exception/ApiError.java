@@ -1,6 +1,9 @@
 package com.salari.framework.uaa.handler.exception;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.annotation.JsonTypeIdResolver;
+import com.salari.framework.uaa.utility.LowerCaseClassNameResolver;
 import lombok.Builder;
 import lombok.Data;
 import org.hibernate.validator.internal.engine.path.PathImpl;
@@ -15,7 +18,8 @@ import java.util.List;
 import java.util.Set;
 
 @Data
-@Builder
+@JsonTypeInfo(include = JsonTypeInfo.As.WRAPPER_OBJECT, use = JsonTypeInfo.Id.CUSTOM, property = "error", visible = true)
+@JsonTypeIdResolver(LowerCaseClassNameResolver.class)
 public class ApiError {
 
     private HttpStatus status;

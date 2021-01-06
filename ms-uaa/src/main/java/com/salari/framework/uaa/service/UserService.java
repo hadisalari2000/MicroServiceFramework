@@ -1,25 +1,18 @@
 package com.salari.framework.uaa.service;
 
-import com.salari.framework.uaa.handler.exception.GlobalException;
+import com.salari.framework.uaa.handler.exception.*;
 import com.salari.framework.uaa.model.domain.user.*;
-import com.salari.framework.uaa.model.dto.base.BaseDTO;
-import com.salari.framework.uaa.model.dto.base.PagerDTO;
-import com.salari.framework.uaa.model.dto.user.JwtUserDTO;
-import com.salari.framework.uaa.model.dto.user.LoginDTO;
-import com.salari.framework.uaa.model.dto.user.UserDTO;
+import com.salari.framework.uaa.model.dto.base.*;
+import com.salari.framework.uaa.model.dto.user.*;
 import com.salari.framework.uaa.model.dto.user.UserVerificationDTO;
 import com.salari.framework.uaa.model.entity.*;
 import com.salari.framework.uaa.model.enums.TokenTypes;
-import com.salari.framework.uaa.model.mapper.PersonMapper;
-import com.salari.framework.uaa.model.mapper.UserMapper;
-import com.salari.framework.uaa.model.mapper.UserVerificationMapper;
+import com.salari.framework.uaa.model.mapper.*;
 import com.salari.framework.uaa.repository.*;
 import com.salari.framework.uaa.security.JwtTokenProvider;
 import com.salari.framework.uaa.utility.PageableUtility;
-import org.hibernate.service.spi.ServiceException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -133,7 +126,7 @@ public class UserService {
         person = personRepository.save(person);
 
         Role newUserRole = roleRepository.findByKey("public").orElseThrow(() ->
-                GlobalException.getNotFoundErrorInstance(Role.class,"key", "public"));
+                NotFoundException.getInstance(Role.class,"key", "public"));
 
         User user = User.builder()
                 .active(true)
@@ -269,7 +262,7 @@ public class UserService {
     public BaseDTO changeUserStatus(UserChangeActivationRequest request) {
 
         User user = userRepository.findById(request.getId()).orElseThrow(() ->
-                GlobalException.getNotFoundErrorInstance(User.class,"id",request.getId().toString()));
+                NotFoundException.getInstance(User.class,"id",request.getId().toString()));
 
         user.setActive(request.getActive());
         userRepository.save(user);
@@ -313,12 +306,12 @@ public class UserService {
         if (userRoles.isPresent())
             return userRoles.get().stream().findFirst().get();
         else
-            throw GlobalException.getNotFoundErrorInstance(Role.class,"user-id",user.getId().toString());
+            throw NotFoundException.getInstance(Role.class,"user-id",user.getId().toString());
     }
 
     private User getExistUser(Integer userId) {
         return userRepository.findById(userId).orElseThrow(() ->
-                GlobalException.getNotFoundErrorInstance(User.class, "user-id",userId.toString()));
+                NotFoundException.getInstance(User.class, "user-id",userId.toString()));
     }
 
     private User getExistUser(String username) {
@@ -333,10 +326,10 @@ public class UserService {
     private User getCurrentUser(TokenTypes tokenTypes) {
         JwtUserDTO userToken = tokenProvider.parseToken();
         if (tokenTypes != null && !userToken.getType().equals(tokenTypes))
-            throw GlobalException.getAuthorizeErrorInstance("unauthenticated_token");
+            throw AuthorizeException.getInstance("unauthenticated_token");
         Integer userId = userToken.getId();
         return userRepository.findById(userId).orElseThrow(() ->
-                GlobalException.getForbiddenErrorInstance(User.class));
+                ForbiddenException.getInstance(User.class));
     }
 
     private Role getCurrentUserRole() {
@@ -344,9 +337,9 @@ public class UserService {
         Integer roleId = userToken.getRoleId();
         Integer userId = userToken.getId();
         Role roleItem = roleRepository.findById(roleId).orElseThrow(() ->
-                GlobalException.getForbiddenErrorInstance(Role.class));
+                ForbiddenException.getInstance(Role.class));
         if (getUserRoles(userId).stream().anyMatch(role -> role.getId().equals(roleId))) return roleItem;
-        else throw GlobalException.getForbiddenErrorInstance(Role.class);
+        else throw ForbiddenException.getInstance(Role.class);
     }
 
     private List<Role> getUserRoles(Integer userId) {
@@ -380,9 +373,9 @@ public class UserService {
 
     private User getUserByNationalCode(String nationalCode) {
         Person person = personRepository.findByNationalCode(nationalCode).orElseThrow(() ->
-                GlobalException.getNotFoundErrorInstance(Person.class,"national-code",nationalCode));
+                NotFoundException.getInstance(Person.class,"national-code",nationalCode));
         return userRepository.findByPersonId(person.getId()).orElseThrow(() ->
-                GlobalException.getNotFoundErrorInstance(Person.class,"id", person.getId().toString()));
+                NotFoundException.getInstance(Person.class,"id", person.getId().toString()));
     }
 
     private void passwordMatcher(String password, String confirmPassword) {

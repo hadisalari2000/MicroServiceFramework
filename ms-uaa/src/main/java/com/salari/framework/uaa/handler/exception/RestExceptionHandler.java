@@ -22,8 +22,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import javax.validation.ConstraintViolationException;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.*;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @ControllerAdvice
@@ -106,25 +105,27 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return buildResponseEntity(apiError);
     }
 
-    /**
-     * Handles EntityNotFoundException. Created to encapsulate errors with more detail than javax.persistence.EntityNotFoundException.
-     *
-     * @param ex the EntityNotFoundException
-     * @return the ApiError object
-     */
-    @ExceptionHandler(GlobalException.class)
-    protected ResponseEntity<Object> handleEntityNotFound( GlobalException ex) {
+    @ExceptionHandler(NotFoundException.class)
+    protected ResponseEntity<Object> handleEntityNotFound( NotFoundException ex) {
         ApiError apiError = new ApiError(NOT_FOUND);
         apiError.setMessage(ex.getMessage());
         return buildResponseEntity(apiError);
     }
 
-    /**
-     * Handles EntityNotFoundException. Created to encapsulate errors with more detail than javax.persistence.EntityNotFoundException.
-     *
-     * @param ex the EntityNotFoundException
-     * @return the ApiError object
-     */
+    @ExceptionHandler(ForbiddenException.class)
+    protected ResponseEntity<Object> handleEntityForbidden( ForbiddenException ex) {
+        ApiError apiError = new ApiError(FORBIDDEN);
+        apiError.setMessage(ex.getMessage());
+        return buildResponseEntity(apiError);
+    }
+
+    @ExceptionHandler(AuthorizeException.class)
+    protected ResponseEntity<Object> handleEntityAuthorize(AuthorizeException ex) {
+        ApiError apiError = new ApiError(UNAUTHORIZED);
+        apiError.setMessage(ex.getMessage());
+        return buildResponseEntity(apiError);
+    }
+
     @ExceptionHandler(GlobalException.class)
     protected ResponseEntity<Object> handleEntityDuplicated( GlobalException ex) {
         ApiError apiError = new ApiError(BAD_REQUEST);

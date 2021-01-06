@@ -1,6 +1,7 @@
 package com.salari.framework.uaa.security;
 
-import com.salari.framework.uaa.handler.exception.GlobalException;
+import com.salari.framework.uaa.handler.exception.ForbiddenException;
+import com.salari.framework.uaa.handler.exception.NotFoundException;
 import com.salari.framework.uaa.model.entity.Api;
 import com.salari.framework.uaa.model.entity.User;
 import com.salari.framework.uaa.model.enums.HttpMethods;
@@ -41,7 +42,7 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
         String method = request.getMethod();
 
         Api api = apiRepository.findApiByUrlAndMethod(url, HttpMethods.valueOf(method)).orElseThrow(()->
-                GlobalException.getNotFoundErrorInstance(Api.class,"url", url,"method",method));
+                NotFoundException.getInstance(Api.class,"url", url,"method",method));
 
         if (!api.getPublicAccess()) {
             String token=tokenProvider.getJwtTokenFromRequest(request);
@@ -54,7 +55,7 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
             if (!checkCurrentUserHavePermission(user, api.getId())) {
-                throw GlobalException.getForbiddenErrorInstance(Api.class);
+                throw ForbiddenException.getInstance(Api.class);
             }
         }
         chain.doFilter(request, response);

@@ -1,5 +1,6 @@
 package com.salari.framework.uaa.service;
 import com.salari.framework.uaa.handler.exception.GlobalException;
+import com.salari.framework.uaa.handler.exception.NotFoundException;
 import com.salari.framework.uaa.model.domain.person.PersonAddRequest;
 import com.salari.framework.uaa.model.domain.person.PersonEditRequest;
 import com.salari.framework.uaa.model.dto.base.BaseDTO;
@@ -63,7 +64,7 @@ public class PersonService {
 
     private Person getPerson(Integer personId){
         return personRepository.findById(personId).orElseThrow(()->
-                GlobalException.getNotFoundErrorInstance(Person.class,"id",personId.toString()));
+                NotFoundException.getInstance(Person.class,"id",personId.toString()));
     }
 
     private void checkDuplicatePerson(String nationalCode,String mobileNumber,Person person){
