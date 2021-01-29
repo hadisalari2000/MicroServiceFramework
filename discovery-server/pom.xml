@@ -14,7 +14,7 @@
         <groupId>com.salari.framework</groupId>
         <artifactId>framework</artifactId>
         <version>0.0.1-SNAPSHOT</version>
-        <relativePath>../</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <properties>

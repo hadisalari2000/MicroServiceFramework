@@ -1,5 +1,7 @@
 package com.salari.framework.msuaa.controller;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import com.salari.framework.msuaa.model.domain.user.*;
 import com.salari.framework.msuaa.model.dto.base.BaseDTO;
 import com.salari.framework.msuaa.model.enums.Genders;
@@ -43,6 +45,14 @@ public class UserController {
     }
 
     @PostMapping("/v1/user/registerWithVerification")
+    @HystrixCommand(fallbackMethod = "registerWithVerificationFallback",
+            commandProperties = {
+                    @HystrixProperty(name="execution.isolation.thread.timeoutInMilliseconds",value = "2000"),
+                    @HystrixProperty(name="circuitBreaker.requestVolumeThreshold",value = "5"),
+                    @HystrixProperty(name="circuitBreaker.errorThresholdPercentage",value = "50"),
+                    @HystrixProperty(name="circuitBreaker.sleepWindowInMilliseconds",value = "5000")
+            }
+    )
     public ResponseEntity<BaseDTO> registerWithVerification(@Valid @RequestBody UserRegisterRequest request){
         return new ResponseEntity<>(userService.registerUserWithVerification(request),HttpStatus.OK);
     }
@@ -128,5 +138,15 @@ public class UserController {
                 .roleId(roleId)
                 .build();
         return new ResponseEntity<>(userService.getUsersByFilter(request,page), HttpStatus.OK);
+    }
+
+
+    public ResponseEntity<BaseDTO> registerWithVerificationFallback(@Valid @RequestBody UserRegisterRequest request) {
+        BaseDTO baseDTO= BaseDTO.builder()
+                .status(HttpStatus.BAD_REQUEST)
+                .data(null)
+                .build();
+
+        return new ResponseEntity<>(baseDTO,HttpStatus.BAD_REQUEST);
     }
 }

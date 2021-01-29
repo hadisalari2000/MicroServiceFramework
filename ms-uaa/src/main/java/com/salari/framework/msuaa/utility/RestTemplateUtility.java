@@ -47,7 +47,6 @@ public class RestTemplateUtility {
         return responseEntity.getBody();
     }
 
-
     public <T> T sendRequest(String url, HttpMethod httpMethod, Object body,ParameterizedTypeReference<T> typeReference) {
         return sendRequest(url,httpMethod,body,typeReference,null);
     }
@@ -65,7 +64,6 @@ public class RestTemplateUtility {
         ResponseEntity<BaseDTO> responseEntity = restTemplate.exchange(url, httpMethod, httpEntity, BaseDTO.class);
         return responseEntity.getBody();
     }
-
 
     private MultiValueMap<String, Object> mapBody(Object obj) {
         MultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
