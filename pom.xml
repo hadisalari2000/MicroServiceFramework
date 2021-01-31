@@ -39,7 +39,13 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- SWAGGER -->
+        <!-- SPRING Actuator -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <!--&lt;!&ndash; SWAGGER &ndash;&gt;
         <dependency>
             <groupId>io.springfox</groupId>
             <artifactId>springfox-swagger2</artifactId>
@@ -73,13 +79,7 @@
             <groupId>io.swagger</groupId>
             <artifactId>swagger-models</artifactId>
             <version>1.5.21</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-config-client</artifactId>
-            <version>2.0.2.RELEASE</version>
-        </dependency>
+        </dependency>-->
 
         <!--LOMBOK-->
         <dependency>
@@ -89,11 +89,11 @@
             <scope>provided</scope>
         </dependency>
 
-        <!--Convert Datetime to Json With @JsonFormat-->
+        <!--&lt;!&ndash;Convert Datetime to Json With @JsonFormat&ndash;&gt;
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
-        </dependency>
+        </dependency>-->
 
     </dependencies>
 

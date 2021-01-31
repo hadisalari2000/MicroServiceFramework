@@ -6,7 +6,7 @@ import com.salari.framework.msuaa.model.domain.user.*;
 import com.salari.framework.msuaa.model.dto.base.BaseDTO;
 import com.salari.framework.msuaa.model.enums.Genders;
 import com.salari.framework.msuaa.service.UserService;
-import io.swagger.annotations.ApiParam;
+/*import io.swagger.annotations.ApiParam;*/
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,8 +25,8 @@ public class UserController {
 
     @GetMapping("/v1/user/login")
     public ResponseEntity<BaseDTO> login(
-            @ApiParam(value = "username",name = "username") @RequestParam String username,
-            @ApiParam(value = "password",name = "password") @RequestParam String password){
+           /* @ApiParam(value = "username",name = "username")*/ @RequestParam String username,
+           /* @ApiParam(value = "password",name = "password")*/ @RequestParam String password){
         LoginRequest request=LoginRequest.builder()
                 .username(username.trim())
                 .password(password.trim())
@@ -98,12 +98,12 @@ public class UserController {
     }
 
     @GetMapping("/v1/user/changeRole")
-    public ResponseEntity<BaseDTO> changeRole(@ApiParam(value = "roleId", name = "roleId") @RequestParam Integer roleId) {
+    public ResponseEntity<BaseDTO> changeRole(/*@ApiParam(value = "roleId", name = "roleId")*/ @RequestParam Integer roleId) {
         return new ResponseEntity<>(userService.changeRole(roleId), HttpStatus.OK);
     }
 
     @GetMapping("/v1/user")
-    public ResponseEntity<BaseDTO> getUserById(@ApiParam(value = "id", name = "id") @RequestParam Integer id) {
+    public ResponseEntity<BaseDTO> getUserById(/*@ApiParam(value = "id", name = "id")*/ @RequestParam Integer id) {
         return new ResponseEntity<>(userService.getUserById(id), HttpStatus.OK);
     }
 
@@ -113,20 +113,20 @@ public class UserController {
     }
 
     @DeleteMapping("/v1/user")
-    public ResponseEntity<BaseDTO> deleteById(@Valid @ApiParam(value="id",name = "id") @RequestParam Integer id){
+    public ResponseEntity<BaseDTO> deleteById(/*@Valid @ApiParam(value="id",name = "id") */@RequestParam Integer id){
         return new ResponseEntity<>(userService.deleteUser(id),HttpStatus.OK);
     }
 
     @GetMapping("/v1/users/filter")
-    public ResponseEntity<BaseDTO> getByFilterForAdmin(@ApiParam(value = "firstName", name = "firstName") @RequestParam(required = false) String firstName,
-                                                       @ApiParam(value = "lastName", name = "lastName") @RequestParam(required = false) String lastName,
-                                                       @ApiParam(value = "username", name = "username") @RequestParam(required = false) String username,
-                                                       @ApiParam(value = "nationalCode", name = "nationalCode") @RequestParam(required = false) String nationalCode,
-                                                       @ApiParam(value = "mobileNumber", name = "mobileNumber") @RequestParam(required = false) String mobileNumber,
-                                                       @ApiParam(value = "gender", name = "gender") @RequestParam(required = false) Genders gender,
-                                                       @ApiParam(value = "email", name = "email") @RequestParam(required = false) String email,
-                                                       @ApiParam(value = "roleId", name = "roleId") @RequestParam(required = false) Integer roleId,
-                                                       @ApiParam(value = "page", name = "page") @RequestParam Integer page) {
+    public ResponseEntity<BaseDTO> getByFilterForAdmin(/*@ApiParam(value = "firstName", name = "firstName")*/ @RequestParam(required = false) String firstName,
+                                                       /*@ApiParam(value = "lastName", name = "lastName")*/ @RequestParam(required = false) String lastName,
+                                                       /*@ApiParam(value = "username", name = "username")*/ @RequestParam(required = false) String username,
+                                                       /*@ApiParam(value = "nationalCode", name = "nationalCode")*/ @RequestParam(required = false) String nationalCode,
+                                                       /*@ApiParam(value = "mobileNumber", name = "mobileNumber")*/ @RequestParam(required = false) String mobileNumber,
+                                                       /*@ApiParam(value = "gender", name = "gender")*/ @RequestParam(required = false) Genders gender,
+                                                       /*@ApiParam(value = "email", name = "email")*/ @RequestParam(required = false) String email,
+                                                       /*@ApiParam(value = "roleId", name = "roleId")*/ @RequestParam(required = false) Integer roleId,
+                                                       /*@ApiParam(value = "page", name = "page")*/ @RequestParam Integer page) {
         UserFilterRequest request = UserFilterRequest.builder()
                 .firstName(firstName)
                 .lastName(lastName)

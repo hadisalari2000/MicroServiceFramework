@@ -1,3 +1,4 @@
+/*
 package com.salari.framework.msuaa.handler.swagger;
 
 import com.google.common.base.Predicates;
@@ -58,3 +59,4 @@ public class SwaggerConfiguration {
         return Lists.newArrayList(new SecurityReference("JWT", authorizationScopes));
     }
 }
+*/
