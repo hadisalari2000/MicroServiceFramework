@@ -4,12 +4,12 @@ public class ResponseFilter extends BaseFilters {
 
     @Override
     public String filterType() {
-        return POST_FILTER;
+        return "post";
     }
 
     @Override
     public int filterOrder() {
-        return FILTER_ORDER;
+        return 2;
     }
 
     @Override

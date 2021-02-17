@@ -15,8 +15,6 @@ import java.util.regex.Pattern;
 
 public class BaseFilters extends ZuulFilter {
 
-    protected static final int FILTER_ORDER = 2;
-    protected static final String POST_FILTER = "post";
     @Autowired
     protected Logger logger;
 

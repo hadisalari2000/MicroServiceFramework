@@ -9,12 +9,12 @@ public class RequestFilter extends BaseFilters {
 
     @Override
     public String filterType() {
-        return ApplicationProperties.getProperty("zuul.default.filter.type");
+        return "pre";
     }
 
     @Override
     public int filterOrder() {
-        return ApplicationProperties.getCode("zuul.authorization.filter.order");
+        return 1;
     }
 
     @Override

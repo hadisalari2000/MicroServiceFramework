@@ -40,23 +40,26 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 
         String url = request.getRequestURI();
         String method = request.getMethod();
+        if (request.getMethod().equalsIgnoreCase("options")) return;
+        if (request.getRequestURI().equals("/v1/resource")) {
+            Api api = apiRepository.findApiByUrlAndMethod(url, HttpMethods.valueOf(method)).orElseThrow(() ->
+                    NotFoundException.getInstance(Api.class, "url", url, "method", method));
 
-        Api api = apiRepository.findApiByUrlAndMethod(url, HttpMethods.valueOf(method)).orElseThrow(()->
-                NotFoundException.getInstance(Api.class,"url", url,"method",method));
+            if (!api.getPublicAccess()) {
+                String token = tokenProvider.getJwtTokenFromRequest(request);
+                Integer userId = tokenProvider.getUserIdFromJWT(token);
+                User user = customUserDetailsService.loadUserById(userId);
+                UserDetails userDetails = customUserDetailsService.loadUserDetailsById(userId);
 
-        if (!api.getPublicAccess()) {
-            String token=tokenProvider.getJwtTokenFromRequest(request);
-            Integer userId = tokenProvider.getUserIdFromJWT(token);
-            User user = customUserDetailsService.loadUserById(userId);
-            UserDetails userDetails = customUserDetailsService.loadUserDetailsById(userId);
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-
-            if (!checkCurrentUserHavePermission(user, api.getId())) {
-                throw ForbiddenException.getInstance(Api.class);
+                if (!checkCurrentUserHavePermission(user, api.getId())) {
+                    throw ForbiddenException.getInstance(Api.class);
+                }
             }
+            chain.doFilter(request, response);
         }
         chain.doFilter(request, response);
     }

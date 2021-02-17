@@ -37,23 +37,18 @@ public class RestTemplateUtility {
         return baseDTO;
     }
 
-    public <T> T sendRequest(String url, HttpMethod httpMethod, Object body, ParameterizedTypeReference<T> typeReference, String channel) {
+    public <T> T sendRequest(String url, HttpMethod httpMethod, Object body, ParameterizedTypeReference<T> typeReference) {
         HttpHeaders httpHeaders = new HttpHeaders();
         HttpServletRequest request = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();
         httpHeaders.setAll(Collections.list(request.getHeaderNames()).stream().collect(Collectors.toMap(name -> name, request::getHeader)));
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-        if (channel !=null) httpHeaders.set("Channel",channel);
         HttpEntity<?> httpEntity = new HttpEntity<>(body, httpHeaders);
         ResponseEntity<T> responseEntity = restTemplate.exchange(url, httpMethod, httpEntity, typeReference);
         return responseEntity.getBody();
     }
 
-    public <T> T sendRequest(String url, HttpMethod httpMethod, Object body,ParameterizedTypeReference<T> typeReference) {
-        return sendRequest(url,httpMethod,body,typeReference,null);
-    }
-
     public BaseDTO sendRequest(String url, HttpMethod httpMethod, Object body) {
-        return sendRequest(url,httpMethod,body,new ParameterizedTypeReference<BaseDTO>() {},null);
+        return sendRequest(url,httpMethod,body,new ParameterizedTypeReference<BaseDTO>() {});
     }
 
     public BaseDTO sendRequest(String url,HttpMethod httpMethod, Object body,MediaType mediaType) {

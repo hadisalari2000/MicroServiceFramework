@@ -1,18 +1,7 @@
-#---------------------------- WEB ------------------------------#
-spring.application.name=gateway-server
-server.port=8001
-management.endpoints.web.exposure.include=hystrix.stream
-
-#---------------------------- EUREKA CLIENT ------------------------------#
-eureka.client.serviceUrl.defaultZone=http://localhost:8761/eureka
-eureka.client.register-with-eureka=true
-eureka.client.fetch-registry=true
-eureka.instance.instance-id=${spring.application.name}:${random.int}
-
 
 #--> GENERAL CONFIGURATIONS
 server.url=http://localhost
-
+#--> EUREKA CONFIGURATIONS
 
 ribbon.ConnectTimeout=500000
 ribbon.ReadTimeout=500000
@@ -21,12 +10,11 @@ zuul.host.connection-request-timeout-millis=500000
 
 #--> GATEWAY SERVER
 server.resource.authorization= http://ms-uaa/v1/resource
-#server.audit.post.async=http://ms-audit/v1/audit/async
-#server.audit.post.duration=http://ms-audit/v1/audit/duration
+server.audit.post.async=http://ms-audit/v1/audit/async
+server.audit.post.duration=http://ms-audit/v1/audit/duration
 
 #--> ZUUL CONFIGURATIONS
 zuul.sensitive-headers=
-zuul.error.path=/error
 zuul.ignored-accesses=*
 zuul.prefix=/api
 zuul.ignored-patterns=/api/ms-uaa/v1/user/id
