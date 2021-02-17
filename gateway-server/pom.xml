@@ -20,20 +20,6 @@
 
     <dependencies>
 
-        <!-- spring-cloud-starter-ribbon -->
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-ribbon</artifactId>
-            <version>1.4.4.RELEASE</version>
-        </dependency>
-
-        <!-- spring-cloud-starter-ribbon -->
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-ribbon</artifactId>
-            <version>1.4.4.RELEASE</version>
-        </dependency>
-
         <dependency>
             <groupId>com.salari.framework</groupId>
             <artifactId>common</artifactId>

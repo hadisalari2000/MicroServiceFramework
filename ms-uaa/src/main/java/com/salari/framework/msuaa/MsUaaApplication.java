@@ -1,6 +1,7 @@
 package com.salari.framework.msuaa;
 
 import com.salari.framework.common.handler.exception.RestTemplateException;
+import com.salari.framework.msuaa.utility.RibbonConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -10,6 +11,7 @@ import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.cloud.netflix.hystrix.dashboard.EnableHystrixDashboard;
+import org.springframework.cloud.netflix.ribbon.RibbonClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.web.client.RestTemplate;
@@ -19,6 +21,7 @@ import org.springframework.web.client.RestTemplate;
 @EnableCircuitBreaker
 @EnableHystrixDashboard
 @ComponentScan(basePackages = {"com.salari.framework.common", "com.salari.framework.msuaa"})
+@RibbonClient(name = "server", configuration = RibbonConfiguration.class)
 public class MsUaaApplication {
 
     public static void main(String[] args) {
