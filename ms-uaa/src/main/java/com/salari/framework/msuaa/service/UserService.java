@@ -1,12 +1,8 @@
 package com.salari.framework.msuaa.service;
 
-import com.salari.framework.msuaa.handler.exception.AuthorizeException;
-import com.salari.framework.msuaa.handler.exception.ForbiddenException;
-import com.salari.framework.msuaa.handler.exception.GlobalException;
-import com.salari.framework.msuaa.handler.exception.NotFoundException;
+import com.salari.framework.common.handler.exception.*;
 import com.salari.framework.msuaa.model.domain.user.*;
-import com.salari.framework.msuaa.model.dto.base.BaseDTO;
-import com.salari.framework.msuaa.model.dto.base.PagerDTO;
+import com.salari.framework.common.model.base.*;
 import com.salari.framework.msuaa.model.dto.user.JwtUserDTO;
 import com.salari.framework.msuaa.model.dto.user.LoginDTO;
 import com.salari.framework.msuaa.model.dto.user.UserDTO;
@@ -116,7 +112,7 @@ public class UserService {
         Optional<Person> existPerson = personRepository.findByNationalCode(request.getNationalCode());
 
         if (existPerson.isPresent() && userRepository.existsByPersonId(existPerson.get().getId()))
-            throw GlobalException.getDuplicateErrorInstance(User.class,"national-code", request.getNationalCode());
+            throw DuplicateException.getInstance(User.class,"national-code", request.getNationalCode());
 
         Person person = existPerson.orElse(Person.builder().build());
         LoginDTO loginDTO = createUserAndLoginIt(person, request.getNationalCode(), request.getMobileNumber(), request.getBirthDate());
@@ -159,7 +155,7 @@ public class UserService {
         Optional<Person> person = personRepository.findByNationalCode(request.getNationalCode());
 
         if (person.isPresent() && userRepository.existsByPersonId(person.get().getId()))
-            throw GlobalException.getDuplicateErrorInstance(User.class,"national-code",request.getNationalCode());
+            throw DuplicateException.getInstance(User.class,"national-code",request.getNationalCode());
 
         UserVerificationDTO userVerificationDTO = generateVerificationCode(request.getNationalCode(), request.getMobileNumber(), request.getBirthDate());
 
@@ -172,7 +168,7 @@ public class UserService {
         Person person = personRepository.findByNationalCode(userVerification.getNationalCode()).orElse(Person.builder().build());
 
         if (userRepository.existsByPersonId(person.getId()))
-            throw GlobalException.getDuplicateErrorInstance(User.class,"national-code",userVerification.getNationalCode());
+            throw DuplicateException.getInstance(User.class,"national-code",userVerification.getNationalCode());
 
         LoginDTO loginDTO = createUserAndLoginIt(
                 person, userVerification.getNationalCode(), userVerification.getMobileNumber(), userVerification.getBirthDate());

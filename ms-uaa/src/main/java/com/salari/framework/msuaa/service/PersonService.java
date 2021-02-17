@@ -1,9 +1,9 @@
 package com.salari.framework.msuaa.service;
-import com.salari.framework.msuaa.handler.exception.GlobalException;
-import com.salari.framework.msuaa.handler.exception.NotFoundException;
+import com.salari.framework.common.handler.exception.DuplicateException;
+import com.salari.framework.common.handler.exception.NotFoundException;
 import com.salari.framework.msuaa.model.domain.person.PersonAddRequest;
 import com.salari.framework.msuaa.model.domain.person.PersonEditRequest;
-import com.salari.framework.msuaa.model.dto.base.BaseDTO;
+import com.salari.framework.common.model.base.BaseDTO;
 import com.salari.framework.msuaa.model.entity.Person;
 import com.salari.framework.msuaa.model.mapper.PersonMapper;
 import com.salari.framework.msuaa.repository.PersonRepository;
@@ -72,10 +72,10 @@ public class PersonService {
         Optional<Person> existPerson=personRepository.findByNationalCodeOrMobileNumber(nationalCode,mobileNumber);
 
         if(existPerson.isPresent() && !(person!=null && existPerson.get().getId().equals(person.getId())) && existPerson.get().getNationalCode().equals(nationalCode))
-            throw  GlobalException.getDuplicateErrorInstance(Person.class, "national-code",nationalCode);
+            throw  DuplicateException.getInstance(Person.class, "national-code",nationalCode);
 
         if(existPerson.isPresent() && !(person!=null && existPerson.get().getId().equals(person.getId())) && existPerson.get().getMobileNumber().equals(mobileNumber))
-            throw GlobalException.getDuplicateErrorInstance(Person.class, "mobile-number",mobileNumber);
+            throw DuplicateException.getInstance(Person.class, "mobile-number",mobileNumber);
     }
 
 }

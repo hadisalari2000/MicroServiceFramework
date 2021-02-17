@@ -1,5 +1,6 @@
 package com.salari.framework.msuaa.utility;
 
+import com.salari.framework.common.utility.ApplicationProperties;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;

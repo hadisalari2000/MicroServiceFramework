@@ -1,10 +1,10 @@
 package com.salari.framework.msuaa.service;
-import com.salari.framework.msuaa.handler.exception.GlobalException;
-import com.salari.framework.msuaa.handler.exception.NotFoundException;
+import com.salari.framework.common.handler.exception.DuplicateException;
+import com.salari.framework.common.handler.exception.NotFoundException;
 import com.salari.framework.msuaa.model.domain.role.RoleAddRequest;
 import com.salari.framework.msuaa.model.domain.role.RoleChangeActivationRequest;
 import com.salari.framework.msuaa.model.domain.role.RoleEditRequest;
-import com.salari.framework.msuaa.model.dto.base.BaseDTO;
+import com.salari.framework.common.model.base.BaseDTO;
 import com.salari.framework.msuaa.model.entity.Role;
 import com.salari.framework.msuaa.model.entity.User;
 import com.salari.framework.msuaa.model.enums.RoleTypes;
@@ -122,9 +122,9 @@ public class RoleService {
         Optional<Role> roleExist=roleRepository.findByTitleOrKey(title,key);
 
         if(roleExist.isPresent() && !(role!=null && roleExist.get().getId().equals(role.getId())) && roleExist.get().getKey().equalsIgnoreCase(key))
-            throw GlobalException.getDuplicateErrorInstance(Role.class, "key",key);
+            throw DuplicateException.getInstance(Role.class, "key",key);
 
         if(roleExist.isPresent() && !(role!=null && roleExist.get().getId().equals(role.getId())) && roleExist.get().getTitle().equalsIgnoreCase(title))
-            throw GlobalException.getDuplicateErrorInstance(Role.class, "title",title);
+            throw DuplicateException.getInstance(Role.class, "title",title);
     }
 }

@@ -14,13 +14,8 @@
         <groupId>com.salari.framework</groupId>
         <artifactId>framework</artifactId>
         <version>0.0.1-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
+        <relativePath>../</relativePath>
     </parent>
-
-    <properties>
-        <java.version>11</java.version>
-        <!--<spring-cloud.version>Hoxton.RELEASE</spring-cloud.version>-->
-    </properties>
 
     <dependencies>
 

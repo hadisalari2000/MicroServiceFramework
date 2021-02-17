@@ -1,5 +1,5 @@
 package com.salari.framework.msuaa.security;
-import com.salari.framework.msuaa.handler.exception.AuthorizeException;
+import com.salari.framework.common.handler.exception.AuthorizeException;
 import com.salari.framework.msuaa.model.enums.TokenTypes;
 import com.salari.framework.msuaa.utility.ApplicationUtilities;
 import io.jsonwebtoken.*;

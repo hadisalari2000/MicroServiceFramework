@@ -1,6 +1,6 @@
 package com.salari.framework.msuaa.security;
 
-import com.salari.framework.msuaa.handler.exception.NotFoundException;
+import com.salari.framework.common.handler.exception.NotFoundException;
 import com.salari.framework.msuaa.model.entity.User;
 import com.salari.framework.msuaa.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;

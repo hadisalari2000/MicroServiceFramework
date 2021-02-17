@@ -3,7 +3,7 @@ package com.salari.framework.msuaa.controller;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import com.salari.framework.msuaa.model.domain.user.*;
-import com.salari.framework.msuaa.model.dto.base.BaseDTO;
+import com.salari.framework.common.model.base.BaseDTO;
 import com.salari.framework.msuaa.model.enums.Genders;
 import com.salari.framework.msuaa.service.UserService;
 /*import io.swagger.annotations.ApiParam;*/

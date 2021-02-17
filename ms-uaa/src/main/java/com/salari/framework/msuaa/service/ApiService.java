@@ -1,6 +1,6 @@
 package com.salari.framework.msuaa.service;
-import com.salari.framework.msuaa.handler.exception.NotFoundException;
-import com.salari.framework.msuaa.model.dto.base.BaseDTO;
+import com.salari.framework.common.handler.exception.NotFoundException;
+import com.salari.framework.common.model.base.BaseDTO;
 import com.salari.framework.msuaa.model.entity.Api;
 import com.salari.framework.msuaa.model.mapper.ApiMapper;
 import com.salari.framework.msuaa.repository.ApiRepository;

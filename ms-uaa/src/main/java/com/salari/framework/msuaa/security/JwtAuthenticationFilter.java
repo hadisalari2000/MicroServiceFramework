@@ -1,7 +1,7 @@
 package com.salari.framework.msuaa.security;
 
-import com.salari.framework.msuaa.handler.exception.ForbiddenException;
-import com.salari.framework.msuaa.handler.exception.NotFoundException;
+import com.salari.framework.common.handler.exception.ForbiddenException;
+import com.salari.framework.common.handler.exception.NotFoundException;
 import com.salari.framework.msuaa.model.entity.Api;
 import com.salari.framework.msuaa.model.entity.User;
 import com.salari.framework.msuaa.model.enums.HttpMethods;
